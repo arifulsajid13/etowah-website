@@ -1428,45 +1428,87 @@ a.cap-card:hover {
 .cta-contact a:hover { text-decoration: underline; }
 .cta-row .btn { margin-left: auto; }
 
-.footer-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px 32px;
-  padding-block: 32px;
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.3fr;
+  gap: 48px;
+  padding-block: 56px 40px;
   border-top: 1px solid rgba(255, 255, 255, .14);
 }
-.site-footer--compact .footer-row {
-  padding-top: 48px;
-  border-top: 0;
+.site-footer--compact .footer-grid { border-top: 0; }
+.footer-col { min-width: 0; }
+.footer-brand {
+  display: inline-block;
+  margin-bottom: 20px;
 }
 .footer-brand img {
   width: auto;
-  height: 40px;
+  height: 44px;
 }
-.footer-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 24px;
-  margin: 0;
+.footer-text {
+  max-width: 320px;
+  margin: 0 0 8px;
   color: var(--on-dark);
   font-size: 0.875rem;
+  line-height: 1.6;
 }
-.footer-sep {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, .25);
+.footer-heading {
+  margin: 0 0 12px;
+  color: var(--steel-300);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
+.footer-links,
+.footer-contact {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+  line-height: 2;
+}
+.footer-links a,
+.footer-contact a,
+.footer-contact span {
+  color: rgba(255, 255, 255, .75);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.footer-links a:hover,
+.footer-contact a:hover {
+  color: var(--white);
+  text-decoration: underline;
+}
+.footer-contact li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.footer-contact .icon {
+  width: 16px;
+  height: 16px;
+  color: var(--steel-300);
+}
+.footer-contact a,
+.footer-contact span { overflow-wrap: anywhere; }
 .footer-legal {
   margin: 0;
   padding: 20px 0 32px;
-  border-top: 1px solid rgba(255, 255, 255, .08);
+  border-top: 1px solid rgba(255, 255, 255, .12);
   color: rgba(255, 255, 255, .62);
   font-size: 0.8125rem;
 }
 
+@media (min-width: 1024px) and (max-width: 1199.98px) {
+  .footer-grid {
+    grid-template-columns: 1.2fr .8fr 1fr 1.4fr;
+    gap: 40px;
+  }
+}
 @media (max-width: 1023.98px) {
   .cta-row {
     flex-wrap: wrap;
@@ -1477,6 +1519,8 @@ a.cap-card:hover {
     max-width: 640px;
   }
   .cta-divider { display: none; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-col--brand { grid-column: 1 / -1; }
 }
 @media (max-width: 639.98px) {
   .cta-row {
@@ -1485,8 +1529,10 @@ a.cap-card:hover {
     padding-block: 56px 40px;
   }
   .cta-row .btn { margin-left: 0; }
-  .footer-sep { display: none; }
-  .footer-meta { gap: 6px 24px; }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
 }
 
 /* Markets page
