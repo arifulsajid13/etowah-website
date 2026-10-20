@@ -1,1 +1,12 @@
+# Server-only secrets and runtime data
+app/config.php
+app/install.lock
+storage/*
+!storage/.htaccess
+!storage/.gitkeep
+uploads/*
+!uploads/.htaccess
+
+# Build output and private reference material
+dist/
 reference/

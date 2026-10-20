@@ -1,0 +1,101 @@
+# Etowah Construction Group — Apache / LiteSpeed (Hostinger) configuration
+
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+ErrorDocument 404 /404.php
+AddDefaultCharset utf-8
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # --- Force HTTPS -----------------------------------------------------------
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # --- Canonical host ----------------------------------------------------------
+  # Default: the bare domain (no "www"). www.example.com → example.com
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+  # To use "www" instead: put a # in front of the two lines above and remove the # from the two lines below.
+  # RewriteCond %{HTTP_HOST} !^www\. [NC]
+  # RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # --- Private folders and files -------------------------------------------
+  RewriteRule ^(app|storage)(/|$) - [F,L]
+  RewriteRule (^|/)\.(?!well-known/) - [F,L]
+  RewriteCond %{DOCUMENT_ROOT}/app/install.lock -f
+  RewriteRule ^install(/|$) - [F,L]
+
+  # --- Old .html addresses → clean URLs (permanent) -----------------------
+  RewriteRule ^index\.html$ / [R=301,L]
+  RewriteRule ^(site-development|underground-utilities|pump-stations|roadways-stormwater|markets|projects|about|careers|contact)\.html$ /$1 [R=301,L]
+
+  # Direct requests for the .php files → clean URLs
+  RewriteCond %{THE_REQUEST} \s/+index\.php[\s?]
+  RewriteRule ^ / [R=301,L]
+  RewriteCond %{THE_REQUEST} \s/+(site-development|underground-utilities|pump-stations|roadways-stormwater|markets|projects|about|careers|contact)\.php[\s?]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # Trailing slash → no trailing slash
+  RewriteRule ^(site-development|underground-utilities|pump-stations|roadways-stormwater|markets|projects|about|careers|contact)/$ /$1 [R=301,L]
+
+  # --- Sitemap and robots ------------------------------------------------------
+  RewriteRule ^sitemap\.xml$ sitemap.php [L]
+  RewriteRule ^robots\.txt$ robots.php [L]
+
+  # --- Clean URLs ---------------------------------------------------------------
+  RewriteRule ^careers/([a-z0-9-]+)/?$ careers.php?slug=$1 [L,QSA]
+  RewriteRule ^(site-development|underground-utilities|pump-stations|roadways-stormwater|markets|projects|about|careers|contact)$ $1.php [L]
+</IfModule>
+
+# --- Deny sensitive file types everywhere ---------------------------------
+<FilesMatch "(\.(sql|md|log|lock|ini|bak|sh|dist)$|^config.*\.php$|^composer\.|^\.git|^\.env|^install-code\.txt$)">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Security headers (PHP pages send these too) ------------------------------
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
+
+# --- Compression ------------------------------------------------------------
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml application/xml application/javascript application/json image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/javascript application/json image/svg+xml
+</IfModule>
+
+# --- Caching ----------------------------------------------------------------
+# CSS/JS URLs carry a ?v= version, so they can be cached for a year.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 10 minutes"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+</IfModule>
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|jpe?g|png|webp|svg|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

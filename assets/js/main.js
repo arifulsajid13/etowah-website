@@ -1,6 +1,3 @@
-// Paste a form service URL (e.g. Formspree) here to send submissions directly.
-const FORM_ENDPOINT = "";
-
 (function () {
   "use strict";
 
@@ -9,12 +6,12 @@ const FORM_ENDPOINT = "";
   root.classList.add("js");
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var mobileQuery = window.matchMedia("(max-width: 959.98px)");
+  var mobileQuery = window.matchMedia("(max-width: 1023.98px)");
 
   document.addEventListener("DOMContentLoaded", function () {
     initHeader();
     initReveal();
-    initContactForm();
+    initForms();
   });
 
   /* Header: scroll shadow, Services dropdown, mobile menu
@@ -204,40 +201,61 @@ const FORM_ENDPOINT = "";
     });
   }
 
-  /* Contact form
+  /* Contact and job application forms
      ======================================================================== */
 
-  function initContactForm() {
-    var form = document.querySelector("[data-contact-form]");
-    if (!form) return;
+  var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var resumeTypes = /\.(pdf|docx?)$/i;
+  var resumeMaxBytes = 5 * 1024 * 1024;
 
+  var formConfigs = {
+    contact: {
+      selector: "[data-contact-form]",
+      rules: [
+        { name: "name", message: "Please enter your full name." },
+        { name: "email", message: "Please enter your email address.", invalid: "Please enter a valid email address, like name@company.com." },
+        { name: "message", message: "Please tell us about your project." }
+      ]
+    },
+    apply: {
+      selector: "[data-apply-form]",
+      rules: [
+        { name: "name", message: "Please enter your full name." },
+        { name: "email", message: "Please enter your email address.", invalid: "Please enter a valid email address, like name@company.com." },
+        { name: "resume", message: "Please attach your resume.", file: true }
+      ]
+    }
+  };
+
+  function initForms() {
+    Object.keys(formConfigs).forEach(function (key) {
+      document.querySelectorAll(formConfigs[key].selector).forEach(function (form) {
+        initForm(form, formConfigs[key].rules);
+      });
+    });
+  }
+
+  function initForm(form, rules) {
     var status = form.querySelector(".form-status");
     var submitBtn = form.querySelector("button[type='submit']");
-    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-    var rules = [
-      { name: "name", message: "Please enter your full name." },
-      { name: "email", message: "Please enter your email address.", invalid: "Please enter a valid email address, like name@company.com." },
-      { name: "message", message: "Please tell us about your project." }
-    ];
 
     function fieldError(input) {
       return document.getElementById(input.id + "-error");
     }
 
     function showError(input, message) {
-      var wrapper = input.closest(".field");
       var error = fieldError(input);
-      wrapper.classList.add("has-error");
+      if (!error) return;
+      input.closest(".field").classList.add("has-error");
       input.setAttribute("aria-invalid", "true");
       error.textContent = message;
       error.hidden = false;
     }
 
     function clearError(input) {
-      var wrapper = input.closest(".field");
       var error = fieldError(input);
-      wrapper.classList.remove("has-error");
+      if (!error) return;
+      input.closest(".field").classList.remove("has-error");
       input.removeAttribute("aria-invalid");
       error.textContent = "";
       error.hidden = true;
@@ -245,6 +263,13 @@ const FORM_ENDPOINT = "";
 
     function checkField(rule) {
       var input = form.elements[rule.name];
+      if (rule.file) {
+        var file = input.files && input.files[0];
+        if (!file) return rule.message;
+        if (!resumeTypes.test(file.name)) return "Please upload your resume as a PDF, DOC, or DOCX file.";
+        if (file.size > resumeMaxBytes) return "That file is too large. The limit is 5 MB.";
+        return "";
+      }
       var value = input.value.trim();
       if (!value) return rule.message;
       if (rule.name === "email" && !emailPattern.test(value)) return rule.invalid;
@@ -269,20 +294,45 @@ const FORM_ENDPOINT = "";
 
     rules.forEach(function (rule) {
       var input = form.elements[rule.name];
-      input.addEventListener("input", function () {
+      input.addEventListener(rule.file ? "change" : "input", function () {
         if (input.getAttribute("aria-invalid") === "true" && !checkField(rule)) clearError(input);
       });
     });
 
-    function setStatus(html, isError) {
-      status.innerHTML = html;
-      status.classList.toggle("is-error", !!isError);
+    // Fallback message with the phone number and email from the site settings.
+    function showFailure(message) {
+      status.textContent = "";
+      if (message) {
+        status.textContent = message;
+      } else {
+        var phone = form.getAttribute("data-error-phone") || "";
+        var email = form.getAttribute("data-error-email") || "";
+        var tel = document.createElement("a");
+        tel.href = "tel:+1" + phone.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
+        tel.textContent = phone;
+        var mail = document.createElement("a");
+        mail.href = "mailto:" + email;
+        mail.textContent = email;
+        status.append("Something went wrong. Please call ", tel, " or email ", mail, " directly.");
+      }
+      status.classList.add("is-error");
       status.hidden = false;
     }
 
-    function value(name) {
-      var el = form.elements[name];
-      return el ? el.value.trim() : "";
+    function showServerErrors(errors) {
+      var firstInvalid = null;
+      Object.keys(errors).forEach(function (name) {
+        var input = form.elements[name];
+        if (input && fieldError(input)) {
+          showError(input, errors[name]);
+          if (!firstInvalid) firstInvalid = input;
+        }
+      });
+      if (firstInvalid) {
+        firstInvalid.focus();
+      } else {
+        showFailure(Object.keys(errors).map(function (k) { return errors[k]; }).join(" "));
+      }
     }
 
     form.addEventListener("submit", function (event) {
@@ -290,58 +340,46 @@ const FORM_ENDPOINT = "";
       status.hidden = true;
       if (!validate()) return;
 
-      if (FORM_ENDPOINT) {
-        var label = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Sending…";
+      var label = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
 
-        fetch(FORM_ENDPOINT, {
-          method: "POST",
-          body: new FormData(form),
-          headers: { Accept: "application/json" }
+      function reset() {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = label;
+      }
+
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" },
+        credentials: "same-origin"
+      })
+        .then(function (response) {
+          return response.json().catch(function () { return { ok: false }; });
         })
-          .then(function (response) {
-            if (!response.ok) throw new Error("Request failed");
+        .then(function (data) {
+          if (data && data.ok) {
             var success = document.createElement("div");
             success.className = "form-success";
             success.setAttribute("role", "status");
             success.setAttribute("tabindex", "-1");
-            success.textContent = "Thank you — your message has been sent. Kenny will be in touch shortly.";
+            success.textContent = data.message;
             form.replaceWith(success);
             success.focus();
-          })
-          .catch(function () {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = label;
-            setStatus(
-              'Sorry — your message could not be sent. Please try again, or email <a href="mailto:Kenny@etowahconstruction.com">Kenny@etowahconstruction.com</a> directly.',
-              true
-            );
-          });
-        return;
-      }
-
-      var lines = [
-        "Full Name: " + value("name"),
-        "Company: " + (value("company") || "Not provided"),
-        "Email: " + value("email"),
-        "Phone: " + (value("phone") || "Not provided"),
-        "Project Type: " + (value("project_type") || "Not provided"),
-        "Project Location: " + (value("location") || "Not provided"),
-        "",
-        "Message:",
-        value("message")
-      ];
-      var subject = "Project Inquiry — " + value("name");
-      var href = "mailto:Kenny@etowahconstruction.com" +
-        "?subject=" + encodeURIComponent(subject) +
-        "&body=" + encodeURIComponent(lines.join("\n"));
-
-      window.location.href = href;
-      setStatus(
-        'Your email app has been opened with your message. If it didn’t open, email <a href="mailto:Kenny@etowahconstruction.com">Kenny@etowahconstruction.com</a> directly.',
-        false
-      );
+            return;
+          }
+          reset();
+          if (data && data.errors) {
+            showServerErrors(data.errors);
+          } else {
+            showFailure(data && data.message);
+          }
+        })
+        .catch(function () {
+          reset();
+          showFailure("");
+        });
     });
   }
 })();
