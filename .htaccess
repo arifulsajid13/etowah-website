@@ -23,7 +23,7 @@ AddDefaultCharset utf-8
   # RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
   # --- Private folders and files -------------------------------------------
-  RewriteRule ^(app|storage)(/|$) - [F,L]
+  RewriteRule ^(app|storage|admin/inc)(/|$) - [F,L]
   RewriteRule (^|/)\.(?!well-known/) - [F,L]
   RewriteCond %{DOCUMENT_ROOT}/app/install.lock -f
   RewriteRule ^install(/|$) - [F,L]

@@ -17,6 +17,7 @@ You will need:
    - **PHP version:** choose **8.2** or newer and save.
    - **PHP Extensions:** make sure these are ticked: `pdo_mysql`, `gd`, `fileinfo`, `mbstring`, `openssl`. Save.
    - **PHP Options:** set `upload_max_filesize` to **12M** and `post_max_size` to **14M**. Save.
+4. Go to **Security → SSL** and check that SSL is **Active** for the domain. Hostinger usually turns it on by itself within a few minutes. The website always uses `https://`, so wait until it shows Active.
 
 ## 2. Create the database
 

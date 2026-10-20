@@ -146,3 +146,37 @@ Local tooling: PHP 8.3 CLI installed via winget (`%LOCALAPPDATA%\Microsoft\WinGe
 **Notes**
 - The local test created `D:\etowah-storage` (empty folders only). The automatic cleanup was blocked by a safety check, so the user can delete it by hand.
 
+## Phase 5 — review and fixes ✅
+
+**Review of §8 (security), line by line**
+- Login: CSRF ✓; generic error ✓; 5 per 15 min per IP + email lockout ✓ (tested: the 6th try is refused even with the right password); ARGON2ID ✓; regenerate id ✓.
+- Sessions: HttpOnly, Secure (on HTTPS), SameSite=Lax, strict mode, 2 h idle, destroy on logout ✓.
+- Auth on every admin endpoint ✓ (index, export, resume; `admin/inc` denied plus a guard). State changes are POST + CSRF only ✓ (tested: a POST without a token → 400). IDs are cast to int ✓.
+- Escaping: every dynamic output goes through `e()`; JSON-LD uses JSON_HEX_TAG; JS uses textContent ✓. Email headers are checked for CR/LF ✓.
+- Headers: HSTS, nosniff, Referrer-Policy, Permissions-Policy ✓. Admin: DENY + strict CSP (zero CSP violations in Puppeteer) ✓.
+- Errors go to the log and are never displayed ✓. Private storage sits above the web root when writable ✓. `uploads/` serves images only and runs no scripts ✓.
+
+**Review of §14 (QA)**
+1. PHP 8.3 CLI installed; `php -l` passes on all 61 PHP files. The installer ran end to end against portable MariaDB 10.11 with `php -S` and a router that mirrors `.htaccess`.
+2. Visual parity at 375/768/1024/1440:
+   - The normalized HTML diff of all 9 pages shows only intended changes (Careers link, form wiring, and the 2 accepted notes from Phase 1).
+   - Screenshot diffs change only in the header and footer bands.
+   - No horizontal overflow at 320–1440, and exactly one H1 on every page.
+3. Links: every 301 (.html, .php, trailing slash) works, plus sitemap and robots; anchors use slug ids.
+4. Flows: every step in the spec list passed (see Phase 3), plus rate limiting (6th contact in an hour refused) and replacing the CTA background (both footer variants).
+5. Attacks: all blocked (see Phases 2 and 3).
+6. No PHP warnings in the logs; no console errors on the public site or dashboard. The only console messages were the expected 404 status on `/nope`.
+
+**Fixes made in this phase**
+- Root `.htaccess` also denies `admin/inc` (defence in depth next to its own `.htaccess`).
+- DEPLOY.md step 1 now checks that SSL is Active before installing, because the site forces https.
+- Installer: the private-storage path uses forward slashes only.
+- Earlier fixes from these reviews: slug `pattern` escaping, the drawer buttons showing on desktop, the sidebar background height, the stacked-table layout, the strict_types guard order, and the phone hint about the Contact SEO description.
+- `dist/etowah-hostinger.zip` rebuilt (103 files, 6.0 MB). Verified that it contains no config, lock, .md files, docs, tools, uploads, or resumes.
+
+**Untested (no Apache/LiteSpeed or real mail server locally)**
+- Real `.htaccess` execution on Hostinger: HTTPS and www redirects, deny rules, Brotli/Gzip, cache headers. The logic was only exercised through the dev router.
+- Real SMTP delivery and PHP `mail()`. The PHPMailer failure path was tested; successful sends were only tested with the local log transport.
+- PHP 8.1/8.2 and MySQL 8 (tested on PHP 8.3 + MariaDB 10.11). File permissions (chmod 600) on Linux.
+- Memory use when processing a full 10 MB photo on shared hosting (`memory_limit` is raised to 512M while processing, if the host allows it).
+
