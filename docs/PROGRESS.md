@@ -63,3 +63,53 @@ Local tooling: PHP 8.3 CLI installed via winget (`%LOCALAPPDATA%\Microsoft\WinGe
 - Generic failures return no message, so the JS shows the standard linked phone/email fallback.
 - Local test mail uses a `log` transport that writes to `storage/logs/mail.log`. It is used for development only; the installer writes `smtp` or `mail`.
 
+## Phase 3 — admin dashboard + security ✅
+
+**Done**
+- `app/auth.php`:
+  - login throttling (5 failures per 15 min per IP-hash + email, plus 20 per IP-hash);
+  - generic error and a dummy-hash timing guard;
+  - ARGON2ID hashing (BCRYPT fallback), rehash on login, `session_regenerate_id(true)`;
+  - 2-hour idle timeout, logout destroys the session, activity log.
+- Sessions: HttpOnly, Secure (on HTTPS), SameSite=Lax, strict mode, private save path in storage, 2-hour gc lifetime.
+- `/admin` structure: `index.php` router, `login.php`, `logout.php` (POST + CSRF), `export.php` (CSV), `resume.php`. Templates live in `admin/inc/` (deny `.htaccess` plus an `ETOWAH_ADMIN` guard).
+- Screens:
+  - Overview: needs attention, 4 stat cards with 7-day trend, latest 5 + 5.
+  - Inquiries: list with search/status/sort/pagination/CSV; detail with mailto/tel, status (contacted stamps `contacted_at` once), notes, delete.
+  - Projects: thumbnails, placeholder badge, publish switch, ↑/↓ order; editor with auto slug, counter, services with optional per-page card text, main service, photo + alt, home position with move confirm, delete.
+  - Jobs: posted_at on first open; delete only with no applications.
+  - Applications: filters, CSV, resume download, delete removes the file.
+  - Pages & SEO: counters, live Google preview, every image slot plus site-wide CTA background.
+  - Settings: contact details, stats, notify emails, GSC code, System box with the last 20 log lines.
+  - Users: add, remove (not self, not last), change password (current required, min 12), last 50 activity entries.
+- UI:
+  - Dark theme by default with a light toggle (localStorage in try/catch; `theme.js` runs before paint).
+  - The sidebar becomes a drawer under 900px, and tables become stacked cards under 640px.
+  - Toasts, a custom `<dialog>` confirm, and plain-language hints.
+- Strict CSP (self + Google Fonts): there is no inline script or style in the dashboard. X-Frame-Options DENY, X-Robots-Tag and meta noindex,nofollow, and `Cache-Control: no-store`.
+- CSV export prefixes `= + - @` to stop spreadsheet formula injection, and adds a BOM for Excel.
+
+**Checks (local MariaDB + php -S + Puppeteer)**
+- All 16 dashboard routes return 200 with zero console or CSP errors and no horizontal overflow at 375, 768, and 1366.
+- Flows passed:
+  - phone change shows on all pages;
+  - a .php renamed .jpg is rejected;
+  - a photo upload creates JPG + WebP, clears the placeholder flag, and the homepage serves a `<picture>`;
+  - the home banner move asks for confirmation and the other project goes to none;
+  - job draft (404) → open (listed, in the sitemap, application received) → closed (404, delete hidden);
+  - resume download works (attachment + nosniff) and gives 302 to login when logged out;
+  - inquiry set to contacted stamps the date; both CSV exports work;
+  - page hero replace serves `<picture>` with fetchpriority; SEO save and live preview work;
+  - delete confirm cancel keeps the record; the theme is remembered.
+- Attacks blocked:
+  - 6th login refused even with the correct password;
+  - admin POST without CSRF → 400, nothing deleted;
+  - GET logout ignored;
+  - `/app/*`, `/storage/*`, `/uploads/x.php`, `/docs/*.md`, `/.git`, and `/.htaccess` → 403;
+  - logged-out admin endpoints → 302 to login.
+
+**Decisions / notes**
+- Reordering uses ↑/↓ buttons, which work without JS and with a keyboard. There is no drag and drop.
+- The Contact page meta description mentions the phone number. It is SEO text kept in `pages`, so the Settings phone hint points to it.
+- These deny rules were verified through the dev router, which mirrors `.htaccess`. Real Apache/LiteSpeed behaviour is untested locally.
+
