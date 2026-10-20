@@ -113,3 +113,36 @@ Local tooling: PHP 8.3 CLI installed via winget (`%LOCALAPPDATA%\Microsoft\WinGe
 - The Contact page meta description mentions the phone number. It is SEO text kept in `pages`, so the Settings phone hint points to it.
 - These deny rules were verified through the dev router, which mirrors `.htaccess`. Real Apache/LiteSpeed behaviour is untested locally.
 
+## Phase 4 — installer and package ✅
+
+**Done**
+- `install/index.php` wizard:
+  1. Owner code: 8 characters in `storage/install-code.txt`; 10 wrong tries create a new code.
+  2. Requirements checklist with plain-language hPanel fixes. The upload limit is a "recommended" item.
+  3. Database test with friendly messages for errors 1045/1049/1044/2002.
+  4. SMTP step with "Send test email" (shows the PHPMailer error) and "Skip for now (use PHP mail)".
+  5. Site URL (auto-detected) and admin account (min 12 characters + strength meter).
+- Finish step:
+  - runs the schema, then the idempotent seed (INSERT IGNORE for settings and pages);
+  - creates or updates the admin user;
+  - creates private storage, using `dirname(public_html)/etowah-storage` when writable and `/storage` otherwise;
+  - writes `app/config.php` (chmod 600) with a 64-hex app secret, writes `app/install.lock`, and deletes the code file.
+- The installer refuses to run when the config or the lock exists; `.htaccess` also returns 403 for /install once the lock exists.
+- `DEPLOY.md`: a 10-step plain-language guide for the owner.
+- `tools/build-package.php` → `dist/etowah-hostinger.zip`, containing only public_html content. It leaves out:
+  - `.md` files, `docs/`, `tools/`, `reference/`, and `.git`;
+  - `app/config.php` and the lock file.
+
+  `storage/` and `uploads/` ship empty, with only their `.htaccess` files.
+- `.gitignore` updated in Phase 1. No Cloudflare files exist in the repo (`wrangler.jsonc` and `.assetsignore` were never present).
+
+**Checks**
+- The full wizard ran in Puppeteer against a fresh MariaDB database:
+  - wrong code, wrong DB password, and SMTP failure are rejected with clear messages; skipping mail works; a short password is rejected;
+  - install completes; `/install/` then returns 403 and the site returns 200;
+  - the owner can sign in (argon2id hash); 8 projects, 20 image slots, and 18 settings are seeded.
+- Before installing, the site redirects to `/install/` while the config is missing.
+
+**Notes**
+- The local test created `D:\etowah-storage` (empty folders only). The automatic cleanup was blocked by a safety check, so the user can delete it by hand.
+

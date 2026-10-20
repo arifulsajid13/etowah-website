@@ -6,6 +6,15 @@ declare(strict_types=1);
  * Run once by the installer. No jobs, applications, or inquiries are created.
  */
 
+/** Create all tables from schema.sql (safe to run again: every table uses IF NOT EXISTS). */
+function run_schema(PDO $pdo): void
+{
+    $sql = preg_replace('/^\s*--.*$/m', '', (string) file_get_contents(APP . '/schema.sql'));
+    foreach (array_filter(array_map('trim', explode(';', $sql)), 'strlen') as $statement) {
+        $pdo->exec($statement);
+    }
+}
+
 function seed_database(PDO $pdo): void
 {
     $pages = [
@@ -126,20 +135,20 @@ function seed_database(PDO $pdo): void
 
     $pdo->beginTransaction();
     try {
-        $stmt = $pdo->prepare('INSERT INTO settings (k, v) VALUES (?, ?) ON DUPLICATE KEY UPDATE v = VALUES(v)');
+        // INSERT IGNORE: running the installer again never overwrites settings or SEO text already edited.
+        $stmt = $pdo->prepare('INSERT IGNORE INTO settings (k, v) VALUES (?, ?)');
         foreach (SETTING_DEFAULTS as $k => $v) {
             $stmt->execute([$k, $v]);
         }
 
-        $stmt = $pdo->prepare('INSERT INTO pages (page_key, meta_title, meta_description) VALUES (?, ?, ?)
-                               ON DUPLICATE KEY UPDATE meta_title = VALUES(meta_title), meta_description = VALUES(meta_description)');
+        $stmt = $pdo->prepare('INSERT IGNORE INTO pages (page_key, meta_title, meta_description) VALUES (?, ?, ?)');
         foreach ($pages as $key => [$title, $description]) {
             $stmt->execute([$key, $title, $description]);
         }
 
         $stmt = $pdo->prepare('INSERT INTO page_images (page_key, slot, label, path, alt, width, height, is_placeholder)
                                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-                               ON DUPLICATE KEY UPDATE label = VALUES(label)');
+                               ON DUPLICATE KEY UPDATE label = VALUES(label)'); // keeps any replaced photo
         foreach ($images as $row) {
             $stmt->execute($row);
         }

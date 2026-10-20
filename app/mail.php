@@ -66,7 +66,8 @@ function mail_send_with(array $mail, array $to, string $subject, string $body, ?
         $mailer->send();
         return true;
     } catch (Throwable $e) {
-        log_error('Mail failed: ' . $mailer->ErrorInfo);
+        $GLOBALS['MAIL_LAST_ERROR'] = $mailer->ErrorInfo ?: $e->getMessage();
+        log_error('Mail failed: ' . $GLOBALS['MAIL_LAST_ERROR']);
         return false;
     }
 }
