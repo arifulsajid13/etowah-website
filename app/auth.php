@@ -107,7 +107,8 @@ function attempt_login(string $email, string $password): ?array
     session_regenerate_id(true);
     $_SESSION['uid'] = (int) $user['id'];
     $_SESSION['last_seen'] = time();
-    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+    // The CSRF token is kept on purpose: the new session ID already stops fixation, and replacing the
+    // token would break contact/careers forms the same person has open in other tabs.
     log_activity('Signed in', 'user', (int) $user['id'], (int) $user['id']);
     return $user;
 }
@@ -132,6 +133,7 @@ function logout(): void
 function log_activity(string $action, string $entity = '', ?int $entityId = null, ?int $userId = null): void
 {
     $userId ??= isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
+    $action = mb_substr($action, 0, 60); // matches activity_log.action VARCHAR(60)
     try {
         db_run('INSERT INTO activity_log (user_id, action, entity, entity_id, created_at) VALUES (?, ?, ?, ?, NOW())', [$userId, $action, $entity, $entityId]);
     } catch (Throwable $e) {

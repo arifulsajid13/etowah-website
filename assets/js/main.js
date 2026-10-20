@@ -235,9 +235,14 @@
     });
   }
 
+  // The server rejects anything sent within 3 seconds of the page loading (anti-bot timer).
+  // People using autofill can be that fast, so the browser waits out the remainder instead.
+  var minWaitMs = 3500;
+
   function initForm(form, rules) {
     var status = form.querySelector(".form-status");
     var submitBtn = form.querySelector("button[type='submit']");
+    var readyAt = Date.now() + minWaitMs;
 
     function fieldError(input) {
       return document.getElementById(input.id + "-error");
@@ -349,12 +354,19 @@
         submitBtn.innerHTML = label;
       }
 
-      fetch(form.action, {
-        method: "POST",
-        body: new FormData(form),
-        headers: { Accept: "application/json" },
-        credentials: "same-origin"
-      })
+      var body = new FormData(form);
+      var send = function () {
+        return fetch(form.action, {
+          method: "POST",
+          body: body,
+          headers: { Accept: "application/json" },
+          credentials: "same-origin"
+        });
+      };
+      var wait = Math.max(0, readyAt - Date.now());
+
+      new Promise(function (resolve) { window.setTimeout(resolve, wait); })
+        .then(send)
         .then(function (response) {
           return response.json().catch(function () { return { ok: false }; });
         })

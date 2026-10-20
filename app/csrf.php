@@ -82,5 +82,15 @@ function form_guard_fields(string $form, string $indent = '            '): strin
 /** True when the request passes every bot / forgery check for a public form. */
 function form_guard_passes(string $form): bool
 {
-    return post_str('website') === '' && csrf_valid() && form_time_valid($form);
+    $reason = match (true) {
+        post_str('website') !== '' => 'honeypot filled',
+        !csrf_valid()              => 'CSRF token missing or expired',
+        !form_time_valid($form)    => 'sent too fast or page too old',
+        default                    => null,
+    };
+    if ($reason !== null) {
+        // Logged without any visitor data, so rejected submissions can be diagnosed later.
+        log_error("Form '{$form}' rejected: {$reason}.");
+    }
+    return $reason === null;
 }
