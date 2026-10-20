@@ -12,7 +12,69 @@
     initHeader();
     initReveal();
     initForms();
+    initGallery();
   });
+
+  /* Project gallery lightbox (native modal <dialog>: Esc closes it and focus stays inside)
+     ======================================================================== */
+
+  function initGallery() {
+    var grid = document.querySelector("[data-gallery]");
+    var box = document.querySelector("[data-lightbox]");
+    if (!grid || !box || typeof box.showModal !== "function") return;
+
+    var items = Array.prototype.slice.call(grid.querySelectorAll(".gallery-item"));
+    var img = box.querySelector("[data-lightbox-img]");
+    var source = box.querySelector("[data-lightbox-source]");
+    var caption = box.querySelector("[data-lightbox-caption]");
+    var count = box.querySelector("[data-lightbox-count]");
+    var current = 0;
+    var opener = null;
+
+    function show(index) {
+      current = (index + items.length) % items.length;
+      var item = items[current];
+      var webp = item.getAttribute("data-webp");
+      if (webp) {
+        source.setAttribute("srcset", webp);
+      } else {
+        source.removeAttribute("srcset");
+      }
+      img.src = item.getAttribute("data-full");
+      img.alt = item.getAttribute("data-alt") || "";
+      img.width = parseInt(item.getAttribute("data-width"), 10) || 0;
+      img.height = parseInt(item.getAttribute("data-height"), 10) || 0;
+      caption.textContent = item.getAttribute("data-alt") || "";
+      count.textContent = (current + 1) + " / " + items.length;
+    }
+
+    var single = items.length < 2;
+    box.querySelector("[data-lightbox-prev]").hidden = single;
+    box.querySelector("[data-lightbox-next]").hidden = single;
+
+    items.forEach(function (item, index) {
+      item.addEventListener("click", function () {
+        opener = item;
+        show(index);
+        box.showModal();
+        box.querySelector("[data-lightbox-close]").focus();
+      });
+    });
+    box.querySelector("[data-lightbox-prev]").addEventListener("click", function () { show(current - 1); });
+    box.querySelector("[data-lightbox-next]").addEventListener("click", function () { show(current + 1); });
+    box.querySelector("[data-lightbox-close]").addEventListener("click", function () { box.close(); });
+    box.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowLeft" && !single) show(current - 1);
+      if (event.key === "ArrowRight" && !single) show(current + 1);
+    });
+    // A click on the dark backdrop (outside the photo and buttons) closes the viewer.
+    box.addEventListener("click", function (event) {
+      if (event.target === box || event.target.classList.contains("lightbox-inner")) box.close();
+    });
+    box.addEventListener("close", function () {
+      if (opener) opener.focus();
+    });
+  }
 
   /* Header: scroll shadow, Services dropdown, mobile menu
      ======================================================================== */

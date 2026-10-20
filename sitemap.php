@@ -19,6 +19,9 @@ foreach (PAGES as $key => [$path]) {
     }
     $urls[] = [site_url($path), max($dates)];
 }
+foreach (projects_published() as $project) {
+    $urls[] = [site_url(project_url($project)), $project['updated_at']];
+}
 foreach (jobs_open() as $job) {
     $urls[] = [site_url('/careers/' . $job['slug']), $job['updated_at']];
 }

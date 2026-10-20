@@ -13,8 +13,43 @@
     initServiceToggles();
     initHomePosition();
     initSeoPreview();
+    initProjectSerp();
     initStrength();
   });
+
+  /* Project SEO: Google preview showing the automatic values when fields are empty */
+  function initProjectSerp() {
+    var serp = document.querySelector("[data-project-serp]");
+    if (!serp) return;
+    var field = function (id) { return document.getElementById(id); };
+    var title = field("p-title");
+    var location = field("p-location");
+    var summary = field("p-summary");
+    var seoTitle = field("p-seo-title");
+    var seoDesc = field("p-seo-desc");
+    var slug = field("p-slug");
+    var host = serp.getAttribute("data-host");
+    var note = document.querySelector("[data-serp-note]");
+
+    function update() {
+      var autoTitle = [title.value.trim(), location.value.trim(), "Etowah Construction Group"].filter(Boolean).join(" | ");
+      var usingAuto = [];
+      if (!seoTitle.value.trim()) usingAuto.push("title");
+      if (!seoDesc.value.trim()) usingAuto.push("description");
+      serp.querySelector("[data-serp-title]").textContent = seoTitle.value.trim() || autoTitle;
+      serp.querySelector("[data-serp-desc]").textContent = seoDesc.value.trim() || summary.value.trim();
+      serp.querySelector("[data-serp-url]").textContent = host + "/projects/" + (slug.value.trim() || "…");
+      if (note) {
+        note.textContent = usingAuto.length
+          ? "Showing the automatic " + usingAuto.join(" and ") + ". Google may shorten or rewrite them."
+          : "Google may shorten or rewrite the title and description.";
+      }
+    }
+    [title, location, summary, seoTitle, seoDesc, slug].forEach(function (el) {
+      if (el) el.addEventListener("input", update);
+    });
+    update();
+  }
 
   /* Theme toggle (remembered per browser) ------------------------------------ */
   function initTheme() {
@@ -91,6 +126,21 @@
   }
 
   function initConfirm() {
+    // Single buttons inside a larger form (e.g. "Remove" on a gallery photo).
+    document.querySelectorAll("button[data-confirm]").forEach(function (btn) {
+      btn.addEventListener("click", function (event) {
+        if (btn.dataset.confirmed === "1") return;
+        event.preventDefault();
+        askConfirm(btn.getAttribute("data-confirm"), "Yes, remove", function () {
+          btn.dataset.confirmed = "1";
+          if (btn.form.requestSubmit) {
+            btn.form.requestSubmit(btn);
+          } else {
+            btn.click();
+          }
+        });
+      });
+    });
     document.querySelectorAll("form[data-confirm]").forEach(function (form) {
       form.addEventListener("submit", function (event) {
         if (form.dataset.confirmed === "1") return;

@@ -14,6 +14,8 @@ const SETTING_DEFAULTS = [
     'markets_line'             => 'Municipal • Commercial • Residential • Roadway',
     'notify_emails'            => 'Kenny@etowahconstruction.com',
     'google_site_verification' => '',
+    'site_url'                 => '',   // empty = use site_url from app/config.php
+    'hide_from_search'         => '1',  // new installs start hidden (demo); switch off at go-live
     'stat1_label' => 'Licensed in Georgia', 'stat1_value' => 'UC002776',
     'stat2_label' => 'Roadway Asphalt',     'stat2_value' => '5.5 miles',
     'stat3_label' => 'Mass Earthwork',      'stat3_value' => '~85,000 CY',
@@ -34,10 +36,10 @@ const PAGES = [
     'contact'               => ['/contact', 'Contact'],
 ];
 
-function settings_all(): array
+function settings_all(bool $refresh = false): array
 {
     static $cache = null;
-    if ($cache === null) {
+    if ($cache === null || $refresh) {
         $cache = SETTING_DEFAULTS;
         foreach (db_all('SELECT k, v FROM settings') as $row) {
             $cache[$row['k']] = (string) $row['v'];
@@ -57,6 +59,12 @@ function settings_save(array $values): void
     foreach ($values as $k => $v) {
         $stmt->execute([$k, (string) $v]);
     }
+}
+
+/** True while the “Hide site from search engines” setting is on. */
+function search_hidden(): bool
+{
+    return setting('hide_from_search') === '1';
 }
 
 /** List of notification addresses from the comma-separated setting. */

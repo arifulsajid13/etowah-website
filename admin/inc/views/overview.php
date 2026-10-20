@@ -26,6 +26,9 @@ if ($staleApplications) {
 if ($placeholders['projects']) {
     $attention[] = [admin_url('projects', ['photos' => 'placeholder']), $placeholders['projects'] . ' ' . ($placeholders['projects'] === 1 ? 'project is' : 'projects are') . ' still using a placeholder photo'];
 }
+if ($placeholders['seo']) {
+    $attention[] = [admin_url('projects', ['seo' => 'missing']), $placeholders['seo'] . ' ' . ($placeholders['seo'] === 1 ? 'project is' : 'projects are') . ' missing a photo description or an SEO meta description'];
+}
 if ($placeholders['images']) {
     $attention[] = [admin_url('pages'), $placeholders['images'] . ' page ' . ($placeholders['images'] === 1 ? 'image is' : 'images are') . ' still marked as placeholder'];
 }

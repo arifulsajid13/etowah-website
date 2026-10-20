@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS projects (
   primary_service VARCHAR(40) NULL,
   summary VARCHAR(300) NOT NULL DEFAULT '',
   description TEXT NULL,
+  seo_title VARCHAR(70) NULL,
+  seo_description VARCHAR(170) NULL,
   image_path VARCHAR(255) NOT NULL DEFAULT '',
   image_alt VARCHAR(255) NOT NULL DEFAULT '',
   image_width INT UNSIGNED NOT NULL DEFAULT 0,
@@ -80,6 +82,21 @@ CREATE TABLE IF NOT EXISTS project_services (
   PRIMARY KEY (project_id, service_key),
   KEY idx_ps_service (service_key, sort_order),
   CONSTRAINT fk_ps_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Optional photo gallery on each project page (max 12 per project, enforced in the dashboard).
+CREATE TABLE IF NOT EXISTS project_images (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  project_id INT UNSIGNED NOT NULL,
+  path VARCHAR(255) NOT NULL,
+  alt VARCHAR(255) NOT NULL DEFAULT '',
+  width INT UNSIGNED NOT NULL DEFAULT 0,
+  height INT UNSIGNED NOT NULL DEFAULT 0,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_pi_project (project_id, sort_order),
+  CONSTRAINT fk_pi_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS jobs (

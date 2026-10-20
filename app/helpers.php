@@ -48,7 +48,9 @@ function is_https(): bool
 /** Absolute URL on the configured site, e.g. site_url('/careers'). */
 function site_url(string $path = '/'): string
 {
-    $base = rtrim((string) config('site_url', ''), '/');
+    // The Site URL setting (dashboard) wins over app/config.php once the site is running.
+    $override = defined('ETOWAH_RUNTIME') && function_exists('setting') ? setting('site_url') : '';
+    $base = rtrim($override !== '' ? $override : (string) config('site_url', ''), '/');
     return $base . '/' . ltrim($path, '/');
 }
 

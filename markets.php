@@ -52,7 +52,7 @@ layout_start('markets');
               <dt>Related projects</dt>
               <dd>
 <?php foreach ($related as $p): ?>
-              <a class="related-link" href="/projects#<?= e($p['slug']) ?>"><?= e($p['title']) ?></a>
+              <a class="related-link" href="<?= e(project_url($p)) ?>"><?= e($p['title']) ?></a>
 <?php endforeach; ?>
               </dd>
             </div>
@@ -87,7 +87,7 @@ layout_start('markets');
               <dt>Related projects</dt>
               <dd>
 <?php foreach ($related as $p): ?>
-              <a class="related-link" href="/projects#<?= e($p['slug']) ?>"><?= e($p['title']) ?></a>
+              <a class="related-link" href="<?= e(project_url($p)) ?>"><?= e($p['title']) ?></a>
 <?php endforeach; ?>
               </dd>
             </div>
@@ -123,7 +123,7 @@ layout_start('markets');
               <dt>Related projects</dt>
               <dd>
 <?php foreach ($related as $p): ?>
-              <a class="related-link" href="/projects#<?= e($p['slug']) ?>"><?= e($p['title']) ?></a>
+              <a class="related-link" href="<?= e(project_url($p)) ?>"><?= e($p['title']) ?></a>
 <?php endforeach; ?>
               </dd>
             </div>
@@ -158,7 +158,7 @@ layout_start('markets');
               <dt>Related projects</dt>
               <dd>
 <?php foreach ($related as $p): ?>
-              <a class="related-link" href="/projects#<?= e($p['slug']) ?>"><?= e($p['title']) ?></a>
+              <a class="related-link" href="<?= e(project_url($p)) ?>"><?= e($p['title']) ?></a>
 <?php endforeach; ?>
               </dd>
             </div>

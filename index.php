@@ -75,7 +75,7 @@ layout_start('home');
 <?php foreach (['card1', 'card2'] as $slot): if (!isset($home[$slot])) continue; $p = $home[$slot]; ?>
 <?= project_card([
     'class' => 'project-card project-card--plain',
-    'href'  => '/projects#' . $p['slug'],
+    'href'  => project_url($p),
     'image' => project_image($p),
     'meta'  => project_status_label($p['status']) . ' • ' . project_place($p),
     'title' => $p['title'],
@@ -85,7 +85,7 @@ layout_start('home');
         </div>
 <?php endif; ?>
 <?php if (isset($home['banner'])): $p = $home['banner']; ?>
-        <a class="project-banner reveal" href="/projects#<?= e($p['slug']) ?>">
+        <a class="project-banner reveal" href="<?= e(project_url($p)) ?>">
           <div class="banner-media"><?= image_html(project_image($p)) ?></div>
           <div class="banner-body">
             <div>

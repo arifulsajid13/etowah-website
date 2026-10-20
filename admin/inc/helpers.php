@@ -151,6 +151,33 @@ function like(string $term): string
     return '%' . addcslashes($term, '%_\\') . '%';
 }
 
+const GALLERY_MAX = 12;
+// Projects that still need a main-photo description or a meta description.
+const PROJECT_SEO_MISSING = "(image_alt = '' OR seo_description IS NULL OR seo_description = '')";
+
+/** Files from a multiple file input (name="field[]") as a list of single-file arrays, empty slots removed. */
+function uploaded_files(string $field): array
+{
+    $raw = $_FILES[$field] ?? null;
+    if (!is_array($raw) || !is_array($raw['name'] ?? null)) {
+        return [];
+    }
+    $files = [];
+    foreach (array_keys($raw['name']) as $i) {
+        if (is_array($raw['name'][$i]) || $raw['error'][$i] === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+        $files[] = [
+            'name'     => (string) $raw['name'][$i],
+            'type'     => (string) $raw['type'][$i],
+            'tmp_name' => (string) $raw['tmp_name'][$i],
+            'error'    => (int) $raw['error'][$i],
+            'size'     => (int) $raw['size'][$i],
+        ];
+    }
+    return $files;
+}
+
 /** Turn an uploaded image into stored image data, or flash the problem and return null. */
 function admin_image_upload(string $field, string $type, int $maxWidth): ?array
 {
@@ -229,5 +256,6 @@ function placeholder_counts(): array
     return [
         'projects' => (int) db_value('SELECT COUNT(*) FROM projects WHERE is_placeholder_image = 1'),
         'images'   => (int) db_value('SELECT COUNT(*) FROM page_images WHERE is_placeholder = 1'),
+        'seo'      => (int) db_value('SELECT COUNT(*) FROM projects WHERE ' . PROJECT_SEO_MISSING),
     ];
 }

@@ -10,6 +10,8 @@ AddDefaultCharset utf-8
   RewriteBase /
 
   # --- Force HTTPS -----------------------------------------------------------
+  # Uses whatever host the visitor asked for, so it works on a Hostinger temporary domain
+  # (e.g. xxx.hostingersite.com) and on the real domain without changes.
   RewriteCond %{HTTPS} !=on
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
@@ -47,6 +49,7 @@ AddDefaultCharset utf-8
 
   # --- Clean URLs ---------------------------------------------------------------
   RewriteRule ^careers/([a-z0-9-]+)/?$ careers.php?slug=$1 [L,QSA]
+  RewriteRule ^projects/([a-z0-9-]+)/?$ project.php?slug=$1 [L,QSA]
   RewriteRule ^(site-development|underground-utilities|pump-stations|roadways-stormwater|markets|projects|about|careers|contact)$ $1.php [L]
 </IfModule>
 

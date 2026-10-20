@@ -4,6 +4,8 @@ declare(strict_types=1);
 /* Sessions, CSRF tokens, and the anti-spam fields used by the public forms. */
 
 const SESSION_IDLE_SECONDS = 7200;
+// Spam-trap field: a name no browser or password manager maps to an autofill type.
+const HONEYPOT_FIELD = 'etw_hp_x7';
 
 function session_start_secure(): void
 {
@@ -75,15 +77,15 @@ function form_guard_fields(string $form, string $indent = '            '): strin
 {
     return $indent . csrf_field() . "\n"
         . $indent . '<input type="hidden" name="form_ts" value="' . e(form_time_token($form)) . '">' . "\n"
-        . $indent . '<div class="hp-field" aria-hidden="true"><label for="' . $form . '-website">Leave this field empty</label>'
-        . '<input id="' . $form . '-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>' . "\n";
+        . $indent . '<div class="hp-field" aria-hidden="true"><label for="' . $form . '-hp">Leave this field empty</label>'
+        . '<input id="' . $form . '-hp" name="' . HONEYPOT_FIELD . '" type="text" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore></div>' . "\n";
 }
 
 /** True when the request passes every bot / forgery check for a public form. */
 function form_guard_passes(string $form): bool
 {
     $reason = match (true) {
-        post_str('website') !== '' => 'honeypot filled',
+        post_str(HONEYPOT_FIELD) !== '' => 'honeypot filled',
         !csrf_valid()              => 'CSRF token missing or expired',
         !form_time_valid($form)    => 'sent too fast or page too old',
         default                    => null,

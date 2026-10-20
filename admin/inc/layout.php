@@ -101,6 +101,9 @@ function admin_start(string $title, string $section): void
       <header class="topbar">
         <button class="icon-btn menu-btn" type="button" data-drawer-open aria-controls="sidebar" aria-expanded="false" aria-label="Open menu"><?= admin_icon('menu') ?></button>
         <h1 class="topbar-title"><?= e($title) ?></h1>
+<?php if (search_hidden()): ?>
+        <a class="topbar-flag" href="<?= e(admin_url('settings')) ?>" title="Search engines are told not to list this site. Change this in Site Settings.">Hidden from search engines</a>
+<?php endif; ?>
         <div class="topbar-user">
           <span class="topbar-email" title="Signed in as <?= e($user['email']) ?>"><?= e($user['email']) ?></span>
           <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch to light theme"><span class="theme-dark"><?= admin_icon('sun') ?></span><span class="theme-light"><?= admin_icon('moon') ?></span></button>

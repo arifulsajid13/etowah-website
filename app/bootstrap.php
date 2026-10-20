@@ -47,8 +47,15 @@ ini_set('error_log', $logDir . '/php-error.log');
 
 require APP . '/db.php';
 require APP . '/settings.php';
+require APP . '/migrate.php';
 require APP . '/images.php';
 require APP . '/content.php';
 require APP . '/render.php';
 
+define('ETOWAH_RUNTIME', true);
+migrate_if_needed();
+
 send_security_headers(false);
+if (search_hidden()) {
+    header('X-Robots-Tag: noindex, nofollow');
+}

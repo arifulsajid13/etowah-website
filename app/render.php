@@ -114,6 +114,16 @@ function job_posting_jsonld(array $job): array
     return array_filter($data, fn($v) => $v !== null && $v !== '');
 }
 
+/** BreadcrumbList structured data. $items: [[name, path], …] from Home to the current page. */
+function breadcrumb_jsonld(array $items): array
+{
+    $list = [];
+    foreach (array_values($items) as $i => [$name, $path]) {
+        $list[] = ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $name, 'item' => site_url($path)];
+    }
+    return ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $list];
+}
+
 function jsonld_script(array $data): string
 {
     $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
@@ -162,6 +172,7 @@ function project_page_card(array $p, string $class): array
         'title'       => $p['title'],
         'text'        => $text,
         'tag_service' => (string) $p['primary_service'],
+        'link'        => project_url($p),
     ];
 }
 
@@ -185,7 +196,7 @@ function service_experience(string $service, string $eyebrow): void
 HTML;
     foreach ($projects as $p) {
         echo project_card([
-            'href'  => '/projects#' . $p['slug'],
+            'href'  => project_url($p),
             'image' => project_image($p),
             'meta'  => project_place($p) . ' • ' . project_status_label($p['status']),
             'title' => $p['card_title'],

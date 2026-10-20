@@ -140,6 +140,7 @@ function seed_database(PDO $pdo): void
         foreach (SETTING_DEFAULTS as $k => $v) {
             $stmt->execute([$k, $v]);
         }
+        $stmt->execute(['schema_version', (string) SCHEMA_VERSION]);
 
         $stmt = $pdo->prepare('INSERT IGNORE INTO pages (page_key, meta_title, meta_description) VALUES (?, ?, ?)');
         foreach ($pages as $key => [$title, $description]) {

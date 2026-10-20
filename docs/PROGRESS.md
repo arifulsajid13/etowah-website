@@ -180,3 +180,66 @@ Local tooling: PHP 8.3 CLI installed via winget (`%LOCALAPPDATA%\Microsoft\WinGe
 - PHP 8.1/8.2 and MySQL 8 (tested on PHP 8.3 + MariaDB 10.11). File permissions (chmod 600) on Linux.
 - Memory use when processing a full 10 MB photo on shared hosting (`memory_limit` is raised to 512M while processing, if the host allows it).
 
+## Project SEO pages and demo-domain readiness ✅ (2026-10-21)
+
+**Task 0 — forms**
+- Contact and careers forms were re-tested in Chrome with autofill-style values: all succeed and show up in the dashboard.
+- The PHP log showed two real rejections from the owner's own Chrome: "honeypot filled". Chrome autofilled the old spam-trap field `website`.
+- The spam-trap field is now `etw_hp_x7`. It keeps `autocomplete="off"` and `tabindex="-1"`, has password-manager ignore flags, and sits off-screen inside an `aria-hidden` wrapper.
+- Email failures were already only logged after the record was saved; no change was needed there.
+
+**Task 1 — project pages**
+- Schema v2:
+  - `projects.seo_title` VARCHAR(70) and `seo_description` VARCHAR(170);
+  - a new `project_images` table (gallery, max 12 per project, enforced in the dashboard).
+- `app/migrate.php`:
+  - `migrate_if_needed()` runs from bootstrap when `settings.schema_version` < 2, and is idempotent (checks columns, CREATE IF NOT EXISTS).
+  - Fresh installs get v2 from `schema.sql` plus the seed, and the installer loads `migrate.php`.
+- `/projects/{slug}` (`project.php`; rewrite in `.htaccess` and the dev router). Published projects only, 404 otherwise. The page has:
+  - a hero with the main image, a breadcrumb, the H1, and a meta line;
+  - a facts row: client, location, market (links to /markets#…), status, services (links);
+  - the description, using the same plain-text rules as jobs;
+  - a lazy WebP + JPG gallery with a `<dialog>` lightbox: Esc, ←/→ with wrap-around, built-in focus trap, focus returns to the thumbnail, and clicking the backdrop closes it;
+  - up to 3 related projects in the same market, then the CTA band.
+- Meta and structured data:
+  - title is `seo_title`, or "Title | Location | Etowah Construction Group";
+  - description is `seo_description`, or the summary;
+  - canonical, og:image = main image, and BreadcrumbList JSON-LD.
+- Every project card now links to `/projects/{slug}`: home cards and banner, service pages, and Markets related links.
+- Projects page cards keep their `id` anchors and gain a "View project →" link.
+- The sitemap includes every published project with its `updated_at`.
+- Dashboard project editor:
+  - SEO section: slug, SEO title (counter, 60), meta description (counter, 160), and a live Google preview that shows the automatic fallbacks.
+  - Main photo alt text is required.
+  - Gallery: multi-upload through `image_store_upload`, alt per photo, ↑/↓ reorder, and remove with a custom confirm (button-level `data-confirm`). Files are deleted when a photo or project is removed.
+- Overview "Needs attention" lists projects missing alt text or a meta description, linking to the Projects list `?seo=missing` filter. The list shows an "SEO to finish" badge.
+
+**Task 2 — demo domain**
+- Site Settings › "Website address and search engines":
+  - **Site URL** (validated as scheme + host [+ port] only) overrides `config.site_url` everywhere through `site_url()`: canonical, sitemap, robots, emails, JSON-LD, OG.
+  - **Hide site from search engines** (seed default ON for new installs). When ON: `<meta name="robots" content="noindex, nofollow">` on every page, an `X-Robots-Tag: noindex, nofollow` header, `robots.txt` = `Disallow: /`, and a yellow "Hidden from search engines" label in the admin top bar. Toggling is logged.
+- Existing installs upgraded by the migration get `hide_from_search = 0`, so an already-live site is not suddenly hidden.
+- `.htaccess`: the HTTPS and www rules already used `%{HTTP_HOST}`, so they work on any host, including `*.hostingersite.com`. A comment now says so.
+- DEPLOY.md: a new "Demo on a temporary domain" section, and step 8 rewritten as "Go live on the real domain" (connect the domain, SSL, Site URL, turn the toggle off, Search Console + sitemap). The installer's done page mentions the toggle.
+
+**Checks**
+- `php -l` passes on every changed PHP file and `node --check` on both JS files.
+- On the local MariaDB:
+  - the migration ran on the existing DB;
+  - a fresh schema + seed gives v2 with the site hidden;
+  - re-running the migration is harmless.
+- Puppeteer, all with zero console errors:
+  - project pages at 1366 and 375 (no overflow, one H1);
+  - SEO save with the fallback preview;
+  - alt-required error;
+  - gallery upload (fake image rejected), reorder, edit, remove;
+  - lightbox keyboard and focus;
+  - Site URL plus the toggle on and off (header, meta, robots, canonical, sitemap, JSON-LD, top-bar label);
+  - both forms.
+- Zip rebuilt (105 files); it contains no tools, config, lock, .md, uploads, or resumes.
+
+**Not tested**
+- Real Apache/LiteSpeed rewrites for `/projects/{slug}`; only the dev router mirrored them.
+- Google's handling of the noindex/robots signals.
+- PHP 8.1/8.2 and MySQL 8.
+

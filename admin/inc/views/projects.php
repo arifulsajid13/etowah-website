@@ -24,12 +24,15 @@ if (is_post()) {
             flash('success', 'Order updated.');
         }
     }
-    redirect(admin_url('projects', ['photos' => get_str('photos')]));
+    redirect(admin_url('projects', ['photos' => get_str('photos'), 'seo' => get_str('seo')]));
 }
 
 $placeholderOnly = get_str('photos') === 'placeholder';
-$rows = db_all('SELECT id, title, slug, status, market, home_position, published, image_path, image_alt, is_placeholder_image FROM projects'
-    . ($placeholderOnly ? ' WHERE is_placeholder_image = 1' : '') . ' ORDER BY sort_order, id');
+$seoOnly = get_str('seo') === 'missing';
+$filtered = $placeholderOnly || $seoOnly;
+$rows = db_all('SELECT id, title, slug, status, market, home_position, published, image_path, image_alt, is_placeholder_image,
+                       ' . PROJECT_SEO_MISSING . ' AS seo_missing FROM projects'
+    . ($placeholderOnly ? ' WHERE is_placeholder_image = 1' : ($seoOnly ? ' WHERE ' . PROJECT_SEO_MISSING : '')) . ' ORDER BY sort_order, id');
 $last = count($rows) - 1;
 
 admin_start('Projects', 'projects');
@@ -40,6 +43,8 @@ admin_start('Projects', 'projects');
         </div>
 <?php if ($placeholderOnly): ?>
         <p class="notice notice--info">Showing only projects that still use a placeholder photo. <a href="<?= e(admin_url('projects')) ?>">Show all projects</a></p>
+<?php elseif ($seoOnly): ?>
+        <p class="notice notice--info">Showing projects that are missing a main-photo description or an SEO meta description. Open each one and fill in the <strong>Search engines (SEO)</strong> section. <a href="<?= e(admin_url('projects')) ?>">Show all projects</a></p>
 <?php endif; ?>
         <section class="panel">
 <?php if ($rows): ?>
@@ -58,7 +63,7 @@ admin_start('Projects', 'projects');
                   <span class="badge badge--warning">Placeholder</span>
 <?php endif; ?>
                 </td>
-                <td data-label="Project"><a class="row-link" href="<?= e(admin_url('project', ['id' => $row['id']])) ?>"><strong><?= e($row['title']) ?></strong></a><span class="cell-sub">/projects#<?= e($row['slug']) ?></span></td>
+                <td data-label="Project"><a class="row-link" href="<?= e(admin_url('project', ['id' => $row['id']])) ?>"><strong><?= e($row['title']) ?></strong></a><span class="cell-sub">/projects/<?= e($row['slug']) ?></span><?php if ($row['seo_missing']): ?><span class="badge badge--warning">SEO to finish</span><?php endif; ?></td>
                 <td data-label="Status"><?= e(project_status_label($row['status'])) ?></td>
                 <td data-label="Market"><?= e(MARKETS[$row['market']]) ?></td>
                 <td data-label="Homepage"><?= $row['home_position'] === 'none' ? '—' : e(['card1' => 'Card 1', 'card2' => 'Card 2', 'banner' => 'Banner'][$row['home_position']]) ?></td>
@@ -72,7 +77,7 @@ admin_start('Projects', 'projects');
                 </td>
                 <td data-label="Order">
                   <div class="order-btns">
-<?php foreach (['up' => 'Move up', 'down' => 'Move down'] as $dir => $label): $disabled = ($dir === 'up' && $i === 0) || ($dir === 'down' && $i === $last) || $placeholderOnly; ?>
+<?php foreach (['up' => 'Move up', 'down' => 'Move down'] as $dir => $label): $disabled = ($dir === 'up' && $i === 0) || ($dir === 'down' && $i === $last) || $filtered; ?>
                     <form method="post" class="inline-form">
                       <?= csrf_field() ?>
                       <input type="hidden" name="action" value="move">
@@ -87,6 +92,8 @@ admin_start('Projects', 'projects');
 <?php endforeach; ?>
             </tbody>
           </table>
+<?php elseif ($seoOnly): ?>
+          <?= empty_state('SEO is complete', 'Every project has a photo description and a meta description.', admin_url('projects'), 'Show all projects') ?>
 <?php elseif ($placeholderOnly): ?>
           <?= empty_state('Every project has a real photo', 'Nice work — no project is using a placeholder photo.', admin_url('projects'), 'Show all projects') ?>
 <?php else: ?>

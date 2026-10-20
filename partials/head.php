@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= e($title) ?></title>
   <meta name="description" content="<?= e($description) ?>">
-<?php if ($noindex): ?>
-  <meta name="robots" content="noindex">
-<?php else: ?>
+<?php if ($noindex || search_hidden()): ?>
+  <meta name="robots" content="noindex, nofollow">
+<?php endif; ?>
+<?php if (!$noindex): ?>
   <link rel="canonical" href="<?= e($canonical) ?>">
 <?php endif; ?>
   <meta property="og:type" content="website">

@@ -54,7 +54,18 @@ if (is_post()) {
     }
     $new['google_site_verification'] = $verification;
 
+    // Site URL: scheme + host (+ optional port), no folder, no trailing slash.
+    $siteUrl = rtrim(post_str('site_url'), '/');
+    if (!preg_match('#^https?://[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*(:\d{1,5})?$#i', $siteUrl)) {
+        $errors['site_url'] = 'Enter the address like https://etowahconstruction.com — no folder and no slash at the end.';
+    }
+    $new['site_url'] = strtolower($siteUrl);
+    $new['hide_from_search'] = isset($_POST['hide_from_search']) ? '1' : '0';
+
     if (!$errors) {
+        if ($new['hide_from_search'] !== setting('hide_from_search')) {
+            log_activity($new['hide_from_search'] === '1' ? 'Hid the site from search engines' : 'Made the site visible to search engines', 'settings');
+        }
         settings_save($new);
         log_activity('Updated site settings', 'settings');
         flash('success', 'Settings saved. Changes are live on every page.');
@@ -147,6 +158,16 @@ admin_start('Site Settings', 'settings');
                   <p class="hint">One or more email addresses, separated by commas.</p>
                   <?= $err('notify_emails') ?>
                 </div>
+              </section>
+              <section class="panel">
+                <div class="panel-head"><h2>Website address and search engines</h2></div>
+                <div class="field<?= $cls('site_url') ?>">
+                  <label for="s-site-url">Site URL</label>
+                  <input id="s-site-url" name="site_url" type="url" maxlength="200" required value="<?= e($values['site_url'] !== '' ? $values['site_url'] : rtrim((string) config('site_url', ''), '/')) ?>" placeholder="https://etowahconstruction.com">
+                  <p class="hint">The address of this website. Used for links in emails, Google (canonical links, sitemap, robots.txt), and sharing previews. Change it here when you move from the temporary domain to the real one.</p>
+                  <?= $err('site_url') ?>
+                </div>
+                <label class="check"><input type="checkbox" name="hide_from_search" value="1"<?= chk(($values['hide_from_search'] ?? '1') === '1') ?>> <span><strong>Hide site from search engines</strong><span class="hint">Keep this on while showing a demo on a temporary domain. Turn it off when the site goes live on the real domain, or Google won’t list it.</span></span></label>
               </section>
               <section class="panel">
                 <div class="panel-head"><h2>Google Search Console</h2></div>

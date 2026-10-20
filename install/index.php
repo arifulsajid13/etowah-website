@@ -34,6 +34,7 @@ ini_set('error_log', ROOT . '/storage/logs/php-error.log');
 
 require APP . '/db.php';
 require APP . '/settings.php';
+require APP . '/migrate.php';
 require APP . '/seed.php';
 require APP . '/auth.php';
 require APP . '/mail.php';
@@ -321,6 +322,7 @@ function install_finish(array $state, string $site, string $name, string $email,
 function install_done_html(string $site): string
 {
     return '<p class="notice">The website is installed and your dashboard account is ready.</p>'
+        . '<p class="notice">The site is <strong>hidden from search engines</strong> for now (good for a demo). When it goes live on the real domain, turn this off in the dashboard under <strong>Site Settings</strong>.</p>'
         . '<p class="notice notice--error"><strong>Delete the /install folder now (hPanel → File Manager).</strong> The installer is already switched off, but the folder should not stay on the server.</p>'
         . '<div class="button-row"><a class="btn btn--primary" href="/admin/">Open the dashboard</a><a class="btn btn--ghost" href="' . e($site) . '/">View the website</a></div>';
 }

@@ -89,14 +89,28 @@ Sign in at **https://your-domain/admin/** and check each item:
 - [ ] Under **Projects**, open a project, upload a real photo, and press **Save changes**. The new photo shows on the website.
 - [ ] When you're done, set the test job to **Closed** (or delete it), and delete the test inquiry and application.
 
-## 8. Turn on SSL and connect your real domain
+## Demo on a temporary domain
 
-1. In hPanel go to **Security → SSL**, and install the free SSL certificate for the domain. The site sends all visitors to `https://` automatically.
-2. To connect your real domain, follow Hostinger's own guide. Go to **https://support.hostinger.com** and search for **"point domain to Hostinger"**.
+You can show the site to the client before the real domain is connected. Hostinger gives every new website a temporary address like `something.hostingersite.com`.
+
+1. Install the site on the temporary address (steps 1–6). The installer fills in that address automatically.
+2. While you demo, the site stays **hidden from search engines**. This is on by default after installing, so Google won't list the temporary address.
+   - The dashboard top bar shows a yellow **Hidden from search engines** label while this is on.
+3. Share the temporary address with the client. Everything works there: forms, emails, the dashboard, and photos.
+
+## 8. Go live on the real domain
+
+1. **Connect the domain.** Follow Hostinger's own guide: go to **https://support.hostinger.com** and search for **"point domain to Hostinger"**.
    - Use exactly the values hPanel shows you for your account.
-3. If the website address changes (for example, from the temporary domain to your real domain), tell your developer.
-   - The address is stored in `app/config.php` (the line that starts with `'site_url'`), and it must match the new domain.
-4. The site uses the address **without "www"** by default and sends www visitors there.
+2. **SSL:** in hPanel go to **Security → SSL**, and make sure the free SSL certificate is **Active** for the real domain. The site sends all visitors to `https://` automatically, on any domain.
+3. **Change the Site URL:** in the dashboard go to **Site Settings → Website address and search engines**. Set **Site URL** to the real address, for example `https://etowahconstruction.com`, and save.
+   - This updates the links in emails, Google listings, the sitemap, and sharing previews. No files need editing.
+4. **Turn the search-engine block off:** on the same page, untick **Hide site from search engines**, and save. The yellow label in the top bar disappears.
+5. **Tell Google:** in **Google Search Console** (https://search.google.com/search-console):
+   - add the site;
+   - verify it, either by pasting the HTML-tag code into **Site Settings → Google Search Console** or by using the DNS method;
+   - under **Sitemaps**, submit `https://your-domain/sitemap.xml`.
+6. The site uses the address **without "www"** by default and sends www visitors there.
 
 ## 9. Backups (once a week)
 
