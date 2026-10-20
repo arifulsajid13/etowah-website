@@ -81,6 +81,39 @@ function organization_jsonld(): array
     return array_filter($org, fn($v) => $v !== '' && $v !== []);
 }
 
+/** JobPosting structured data from stored fields only; anything missing is left out. */
+function job_posting_jsonld(array $job): array
+{
+    $types = ['Full-time' => 'FULL_TIME', 'Part-time' => 'PART_TIME', 'Contract' => 'CONTRACTOR', 'Seasonal' => 'TEMPORARY', 'Internship' => 'INTERN'];
+    $data = [
+        '@context'           => 'https://schema.org',
+        '@type'              => 'JobPosting',
+        'title'              => $job['title'],
+        'description'        => plain_text_html((string) $job['description']),
+        'datePosted'         => $job['posted_at'] ? date('Y-m-d', strtotime($job['posted_at'])) : null,
+        'hiringOrganization' => [
+            '@type'  => 'Organization',
+            'name'   => setting('company_name'),
+            'sameAs' => site_url('/'),
+            'logo'   => site_url('/assets/images/logo/logo-horizontal.png'),
+        ],
+        'employmentType'     => $types[$job['employment_type']] ?? null,
+    ];
+    if (trim((string) $job['location']) !== '') {
+        [$city, $region] = array_pad(array_map('trim', explode(',', $job['location'], 2)), 2, '');
+        $data['jobLocation'] = [
+            '@type'   => 'Place',
+            'address' => array_filter([
+                '@type'           => 'PostalAddress',
+                'addressLocality' => $city,
+                'addressRegion'   => $region,
+                'addressCountry'  => 'US',
+            ], 'strlen'),
+        ];
+    }
+    return array_filter($data, fn($v) => $v !== null && $v !== '');
+}
+
 function jsonld_script(array $data): string
 {
     $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);

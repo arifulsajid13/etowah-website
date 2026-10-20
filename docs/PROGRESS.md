@@ -35,3 +35,31 @@ Local tooling: PHP 8.3 CLI installed via winget (`%LOCALAPPDATA%\Microsoft\WinGe
   - Markets › Municipal related projects follow the global project order (rebuild, bartow, rehab).
 - `picture { display: contents; }` was added so uploaded WebP images keep the existing layout.
 
+## Phase 2 — forms and careers ✅
+
+**Done**
+- `/careers/{slug}`: breadcrumb, H1, meta line, plain-text description (paragraphs and "- " bullets, all escaped), and the application form. JobPosting JSON-LD is built from stored fields only. A job that isn't open returns 404.
+- `/careers` empty state + general application form ("Send us your details.").
+- `partials/apply-form.php` (shared). `submit-application.php` checks:
+  - upload status, size (5 MB), and an extension allowlist;
+  - the `finfo` MIME type;
+  - magic bytes, and that a docx contains `word/document.xml`.
+
+  Resumes are stored as random 32-hex names in private storage, the original name is kept for display only, and the notification email never attaches the resume.
+- `submit-contact.php`: validation and length limits, saved to `inquiries`, notification email (From = configured sender, Reply-To = visitor).
+- Abuse protection on both forms: honeypot, signed time token (≥3 s), CSRF (session), 5 per hour per IP-hash per form, and a generic rejection.
+- `main.js`: the mailto fallback and `FORM_ENDPOINT` are removed. One `initForm()` handles both forms with fetch + FormData, inline server errors, and the settings-based "Something went wrong. Please call … or email … directly." fallback.
+- No-JS fallback: the form posts normally and the page shows `?sent=1` / `?applied=1` / `?error=1`.
+
+**Checks**
+- curl tests passed:
+  - too fast, missing CSRF, honeypot, and validation errors are all rejected;
+  - an `.exe` renamed `.pdf` and a PHP file renamed `.docx` are rejected;
+  - a closed or unknown job is rejected;
+  - a valid PDF is stored, and the path traversal in its filename is stripped.
+- Puppeteer (local Chrome): inline errors on an empty submit, contact success, application with a PDF success, mobile menu at 1000px, and zero console errors.
+
+**Decisions**
+- Generic failures return no message, so the JS shows the standard linked phone/email fallback.
+- Local test mail uses a `log` transport that writes to `storage/logs/mail.log`. It is used for development only; the installer writes `smtp` or `mail`.
+

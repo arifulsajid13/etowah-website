@@ -1734,6 +1734,7 @@ a.job-card:hover .text-link .icon { transform: translateX(3px); }
   gap: 56px;
   align-items: start;
 }
+.job-content h2 { margin-bottom: 20px; }
 .job-content p { margin: 0 0 16px; }
 .job-content ul {
   margin: 0 0 16px;
