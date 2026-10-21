@@ -1,8 +1,7 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
-$current = projects_published('current');
-$completed = projects_published('completed');
+$projects = projects_published();
 
 layout_start('projects');
 ?>
@@ -19,29 +18,15 @@ layout_start('projects');
       </div>
     </section>
 
-<?php if ($current): ?>
-    <section class="section" aria-labelledby="current-title">
+<?php if ($projects): ?>
+    <section class="section" aria-labelledby="list-title">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow">CURRENT PROJECTS</p>
-          <h2 id="current-title">Underway now.</h2>
-        </div>
-        <div class="project-grid" data-stagger>
-<?php foreach ($current as $p) echo project_card(project_page_card($p, 'project-card project-card--large')); ?>
-        </div>
-      </div>
-    </section>
-
-<?php endif; ?>
-<?php if ($completed): ?>
-    <section class="section section--alt" aria-labelledby="completed-title">
-      <div class="container">
-        <div class="section-head reveal">
-          <p class="eyebrow">COMPLETED PROJECTS</p>
-          <h2 id="completed-title">Proven in the field.</h2>
+          <p class="eyebrow">OUR PROJECTS</p>
+          <h2 id="list-title">Proven in the field.</h2>
         </div>
         <div class="project-grid project-grid--3" data-stagger>
-<?php foreach ($completed as $p) echo project_card(project_page_card($p, 'project-card')); ?>
+<?php foreach ($projects as $p) echo project_card(project_page_card($p, 'project-card')); ?>
         </div>
       </div>
     </section>

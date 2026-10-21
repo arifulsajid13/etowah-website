@@ -21,7 +21,7 @@ layout_start('markets');
         <div class="intro-center reveal">
           <p class="eyebrow">WHO WE BUILD FOR</p>
           <h2 id="markets-intro-title">Different clients. One capable team.</h2>
-          <p>Etowah Construction Group has completed municipal, commercial, residential, and roadway projects since launch. Whatever the market, the approach is the same: complete civil scope, careful execution, and critical connections done right.</p>
+          <p>Etowah Construction Group has delivered municipal, commercial, residential, and roadway projects since launch. Whatever the market, the approach is the same: complete civil scope, careful execution, and critical connections done right.</p>
         </div>
         <nav class="jump-strip reveal" aria-label="Jump to a market">
           <ul>

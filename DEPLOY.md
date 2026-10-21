@@ -125,14 +125,23 @@ Hostinger also makes automatic backups (hPanel → **Files → Backups**). The w
 
 ## 10. Updating the website later
 
-When your developer sends you updated files:
+When your developer sends you **etowah-update.zip**:
 
-1. Upload only the changed files, replacing the old ones.
-2. Never overwrite or delete:
+1. Back up first (step 9).
+2. In File Manager, open `public_html`, upload **etowah-update.zip**, right-click it and choose **Extract**. Extract into `public_html` itself, and say yes to replacing existing files.
+3. Delete **etowah-update.zip** after it is extracted.
+4. Open any page of the website once. Any database changes in the update run by themselves on that first visit.
+
+The update zip contains only code. It never includes the items below, so extracting it leaves them untouched.
+
+If your developer sends single files instead, upload only those files, replacing the old ones.
+
+Never overwrite or delete:
    - `app/config.php` — your passwords and settings;
    - `app/install.lock`;
    - the `uploads` folder — your photos;
    - the `storage` / `etowah-storage` folder — resumes and logs.
-3. Never upload an `install` folder again unless your developer asks you to.
+
+Never upload an `install` folder again unless your developer asks you to.
 
 Need help? Tell your developer what you see on the screen. The dashboard's **Site Settings → System** box shows the server's health and the most recent errors.

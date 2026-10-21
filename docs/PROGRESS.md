@@ -243,3 +243,43 @@ Local tooling: PHP 8.3 CLI installed via winget (`%LOCALAPPDATA%\Microsoft\WinGe
 - Google's handling of the noindex/robots signals.
 - PHP 8.1/8.2 and MySQL 8.
 
+
+## Project status wording removed + update package ✅ (2026-10-22)
+
+Client request: show every project as finished work, with no "Current", "Completed", "In progress" or "Underway" wording used as a project status anywhere on the public site. No design changes.
+
+- Projects page: one section, "OUR PROJECTS / Proven in the field.", with all published projects in admin sort order. It uses the existing 3-column `project-card` grid.
+- The status label is removed from:
+  - the home cards and banner;
+  - the service-page "Experience" cards;
+  - the project page hero meta and its "Status" fact;
+  - the related-project cards.
+- Copy changes:
+  - About: "Our completed work includes" → "Our work includes", and "Completed … projects since launch" → "… projects delivered since launch".
+  - Markets intro: "has completed" → "has delivered".
+- Left as is:
+  - "complete" meaning whole ("Complete civil scope", "complete sitework");
+  - past-tense verbs inside project descriptions ("Completed 5.5 miles…").
+- The admin still stores status, with a hint that it is internal only.
+- Migration v3 updates seeded copy only if it was never edited:
+  - the Projects meta description: "Current and completed …" → "Site development, underground utility, pump station, and roadway projects across Georgia and Tennessee.";
+  - the Alpharetta description: "Completing…" → "Completed…".
+  - The seed has the same text.
+- `tools/build-package.php update` builds `dist/etowah-update.zip` for an installed site:
+  - it holds code files only (php, js, css, sql, .htaccess);
+  - it leaves out install/, uploads/, storage/, app/config.php, app/install.lock, images, docs, tools, .md files and the other build-only paths;
+  - the migration runs from `app/bootstrap.php` on the first page load.
+- DEPLOY.md step 10 now explains how to use the update zip.
+
+**Checks**
+- `php -l` passes on the changed files.
+- Update path:
+  - the last commit (v2) was extracted to a scratch folder and the update zip extracted over it;
+  - the local DB was reset to v2 with the original texts;
+  - the first page load moved it to v3 and updated both texts.
+- Chrome (playwright-core), 375px and 1440px:
+  - pages: Home, Projects, all 8 project pages, the 4 service pages, Markets and About;
+  - all return 200, with one H1, no horizontal overflow and no console errors;
+  - visible text, meta, JSON-LD and alt/aria text have no status wording;
+  - every reveal element shows after scrolling, and all images load.
+- Both zips rebuilt: update 70 files, hostinger 105 files.

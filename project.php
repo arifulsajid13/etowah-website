@@ -11,7 +11,7 @@ $gallery = project_gallery((int) $p['id']);
 $related = projects_related($p, 3);
 $hero = project_image($p);
 $market = MARKETS[$p['market']];
-$meta = implode(' • ', array_filter([project_status_label($p['status']), (string) $p['location'], $market], 'strlen'));
+$meta = implode(' • ', array_filter([(string) $p['location'], $market], 'strlen'));
 
 layout_start('projects', [
     'title'       => project_meta_title($p),
@@ -44,7 +44,6 @@ layout_start('projects', [
           <div><dt>Location</dt><dd><?= e($p['location']) ?></dd></div>
 <?php endif; ?>
           <div><dt>Market</dt><dd><a href="/markets#<?= e($p['market']) ?>"><?= e($market) ?></a></dd></div>
-          <div><dt>Status</dt><dd><?= e(project_status_label($p['status'])) ?></dd></div>
 <?php if ($services): ?>
           <div><dt>Services</dt><dd><?= implode(', ', array_map(fn($s) => '<a href="/' . $s . '">' . e(SERVICES[$s]) . '</a>', $services)) ?></dd></div>
 <?php endif; ?>
@@ -98,7 +97,7 @@ layout_start('projects', [
 <?= project_card([
     'href'  => project_url($r),
     'image' => project_image($r),
-    'meta'  => project_place($r) . ' • ' . project_status_label($r['status']),
+    'meta'  => project_place($r),
     'title' => $r['title'],
     'text'  => $r['summary'],
 ]) ?>

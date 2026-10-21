@@ -259,6 +259,7 @@ admin_start($isNew ? 'Add project' : 'Edit project', 'projects');
                       <option value="current"<?= sel($p['status'] === 'current') ?>>Current (underway)</option>
                       <option value="completed"<?= sel($p['status'] === 'completed') ?>>Completed</option>
                     </select>
+                    <p class="hint">For your records only. The public site does not show project status.</p>
                   </div>
                   <div class="field">
                     <label for="p-market">Market</label>

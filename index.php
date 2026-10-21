@@ -77,7 +77,7 @@ layout_start('home');
     'class' => 'project-card project-card--plain',
     'href'  => project_url($p),
     'image' => project_image($p),
-    'meta'  => project_status_label($p['status']) . ' • ' . project_place($p),
+    'meta'  => project_place($p),
     'title' => $p['title'],
     'text'  => $p['summary'],
 ]) ?>
@@ -89,7 +89,7 @@ layout_start('home');
           <div class="banner-media"><?= image_html(project_image($p)) ?></div>
           <div class="banner-body">
             <div>
-              <p class="meta"><?= e(upper(project_status_label($p['status']) . ' • ' . project_place($p))) ?></p>
+              <p class="meta"><?= e(upper(project_place($p))) ?></p>
               <h3><?= e($p['title']) ?></h3>
             </div>
             <?= icon('chevron-right') ?>

@@ -158,7 +158,7 @@ function project_card(array $card): string
 /** Card data for a project on the Projects page (full description, client name, service tag). */
 function project_page_card(array $p, string $class): array
 {
-    $meta = array_filter([project_status_label($p['status']), (string) $p['location'], MARKETS[$p['market']]], 'strlen');
+    $meta = array_filter([(string) $p['location'], MARKETS[$p['market']]], 'strlen');
     $text = trim((string) $p['description']);
     if (!empty($p['client_name'])) {
         $text = $p['client_name'] . '. ' . $text;
@@ -198,7 +198,7 @@ HTML;
         echo project_card([
             'href'  => project_url($p),
             'image' => project_image($p),
-            'meta'  => project_place($p) . ' • ' . project_status_label($p['status']),
+            'meta'  => project_place($p),
             'title' => $p['card_title'],
             'text'  => $p['card_summary'],
         ]);

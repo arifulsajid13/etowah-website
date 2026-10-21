@@ -6,7 +6,7 @@ declare(strict_types=1);
  * The current version is stored in settings.schema_version; fresh installs get it from the seed.
  */
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 /** Run any pending upgrades once. Called from bootstrap on every request (one cheap settings lookup). */
 function migrate_if_needed(): void
@@ -47,6 +47,16 @@ function run_migrations(PDO $pdo, int $from): void
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         // An existing site may already be live, so it stays visible to search engines after the upgrade.
         $pdo->exec("INSERT IGNORE INTO settings (k, v) VALUES ('hide_from_search', '0'), ('site_url', '')");
+    }
+    if ($from < 3) {
+        // v3: the public site shows no project status. Only seeded copy that was never edited is updated.
+        $pdo->prepare('UPDATE pages SET meta_description = ? WHERE page_key = ? AND meta_description = ?')->execute([
+            'Site development, underground utility, pump station, and roadway projects across Georgia and Tennessee.',
+            'projects',
+            'Current and completed site development, underground utility, pump station, and roadway projects in Georgia and Tennessee.',
+        ]);
+        $pdo->prepare("UPDATE projects SET description = CONCAT('Completed', SUBSTRING(description, 11)) WHERE slug = ? AND description LIKE 'Completing all site work scopes,%'")
+            ->execute(['alpharetta-commercial']);
     }
     $stmt = $pdo->prepare("INSERT INTO settings (k, v) VALUES ('schema_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)");
     $stmt->execute([(string) SCHEMA_VERSION]);

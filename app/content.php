@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 /* Read-only content queries used by the public pages. */
 
+/** Admin only: the public site shows no project status. */
 function project_status_label(string $status): string
 {
     return $status === 'current' ? 'Current' : 'Completed';
@@ -14,11 +15,8 @@ function project_place(array $project): string
     return $project['location'] ?: MARKETS[$project['market']];
 }
 
-function projects_published(?string $status = null): array
+function projects_published(): array
 {
-    if ($status !== null) {
-        return db_all('SELECT * FROM projects WHERE published = 1 AND status = ? ORDER BY sort_order, id', [$status]);
-    }
     return db_all('SELECT * FROM projects WHERE published = 1 ORDER BY sort_order, id');
 }
 

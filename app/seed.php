@@ -24,7 +24,7 @@ function seed_database(PDO $pdo): void
         'pump-stations' => ['Pump Stations | Etowah Construction Group', 'Pump station new construction and rehabilitation — bypass pumping, wet wells, pumps, process piping, and electrical equipment for municipal water and wastewater systems.'],
         'roadways-stormwater' => ['Roadways & Stormwater | Etowah Construction Group', 'Asphalt paving, DOT-road work, curb and gutter, public-roadway tie-ins, and underground stormwater retention in Georgia.'],
         'markets' => ['Markets | Etowah Construction Group', 'Etowah Construction Group serves municipal water and wastewater, commercial development, residential development, and roadway infrastructure clients in Georgia and Tennessee.'],
-        'projects' => ['Projects | Etowah Construction Group', 'Current and completed site development, underground utility, pump station, and roadway projects in Georgia and Tennessee.'],
+        'projects' => ['Projects | Etowah Construction Group', 'Site development, underground utility, pump station, and roadway projects across Georgia and Tennessee.'],
         'about' => ['About | Etowah Construction Group', 'Etowah Construction Group is a licensed Georgia utility contractor in Cartersville delivering site development, underground utility, roadway, and pump-station construction.'],
         'careers' => ['Careers | Etowah Construction Group', 'Join Etowah Construction Group, a licensed Georgia utility contractor in Cartersville. View open positions and apply.'],
         'contact' => ['Contact | Etowah Construction Group', 'Discuss your site development, underground utility, pump station, or roadway project with Etowah Construction Group. Call 678-763-8047.'],
@@ -69,7 +69,7 @@ function seed_database(PDO $pdo): void
             'title' => '2.5-Acre Commercial Site', 'slug' => 'alpharetta-commercial', 'status' => 'current',
             'client_name' => null, 'location' => 'Alpharetta, GA', 'market' => 'commercial', 'primary_service' => 'underground-utilities',
             'summary' => 'Full sitework, water, sewer, storm piping, and underground retention.',
-            'description' => 'Completing all site work scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.',
+            'description' => 'Completed all site work scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.',
             'image' => ['assets/images/projects/alpharetta-commercial-site.jpg', 'Wheel loader working on a commercial site with reinforcing steel and a crane behind'],
             'home_position' => 'card2',
             'services' => [

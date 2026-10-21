@@ -1,15 +1,23 @@
 <?php
 /*
- * Builds dist/etowah-hostinger.zip: exactly what goes into Hostinger's public_html.
- * Usage: php tools/build-package.php
+ * Builds the upload packages in dist/.
+ *   php tools/build-package.php          → etowah-hostinger.zip: exactly what goes into Hostinger's public_html (new install).
+ *   php tools/build-package.php update   → etowah-update.zip: code files only, for updating an already-installed site.
+ *     Leaves out the installer, config, uploads, storage, images, and the other non-code files that are already on the server.
+ *     Database changes run by themselves on the first page load after upload (app/migrate.php).
  */
 
 $root = dirname(__DIR__);
-$out = $root . '/dist/etowah-hostinger.zip';
+$update = ($argv[1] ?? '') === 'update';
+$out = $root . '/dist/' . ($update ? 'etowah-update.zip' : 'etowah-hostinger.zip');
 
-// Paths (relative, forward slashes) that never go into the package.
-$excludeDirs = ['.git', 'dist', 'docs', 'reference', 'tools', '.claude', '.vscode', 'node_modules'];
+// Paths (relative, forward slashes) that never go into a package.
+$excludeDirs = ['.git', 'dist', 'docs', 'reference', 'tools', 'demo-static', '.claude', '.vscode', 'node_modules'];
 $excludeFiles = ['.gitignore', '.gitattributes', 'wrangler.jsonc', '.assetsignore', 'app/config.php', 'app/install.lock', 'storage/install-code.txt', 'storage/install-attempts.txt'];
+if ($update) {
+    array_push($excludeDirs, 'install', 'uploads', 'storage');
+}
+$codeTypes = ['php', 'js', 'css', 'sql', 'htaccess'];
 
 if (!class_exists('ZipArchive')) {
     fwrite(STDERR, "The zip extension is required.\n");
@@ -40,8 +48,14 @@ foreach ($it as $file) {
         continue;
     }
     if ($file->isDir()) {
-        $zip->addEmptyDir($rel);
-        $zip->setExternalAttributesName($rel . '/', ZipArchive::OPSYS_UNIX, (040755 << 16));
+        // The update zip only creates folders that hold files, so it adds nothing empty to the live site.
+        if (!$update) {
+            $zip->addEmptyDir($rel);
+            $zip->setExternalAttributesName($rel . '/', ZipArchive::OPSYS_UNIX, (040755 << 16));
+        }
+        continue;
+    }
+    if ($update && !in_array(strtolower(pathinfo($rel, PATHINFO_EXTENSION) ?: ltrim(basename($rel), '.')), $codeTypes, true)) {
         continue;
     }
     $zip->addFile($file->getPathname(), $rel);

@@ -22,7 +22,7 @@ layout_start('about');
           <p class="eyebrow">WHO WE ARE</p>
           <h2 id="who-title">From clearing to final surface.</h2>
           <p>Established in May 2024, Etowah Construction Group delivers site development, underground utility, roadway, and pump-station construction for municipal, commercial, and residential clients.</p>
-          <p>Our completed work includes full-site packages, large-diameter water infrastructure, pump-station rehabilitation, DOT-road paving, deep excavation, bypass operations, and critical public-roadway tie-ins.</p>
+          <p>Our work includes full-site packages, large-diameter water infrastructure, pump-station rehabilitation, DOT-road paving, deep excavation, bypass operations, and critical public-roadway tie-ins.</p>
           <dl class="credentials">
             <div><dt>Licensed Utility Contractor</dt><dd>State of Georgia</dd></div>
             <div><dt>License No.</dt><dd><?= e(setting('license_number')) ?></dd></div>
@@ -53,7 +53,7 @@ layout_start('about');
           <div class="cap-card">
             <span class="why-num">03</span>
             <h3>Cross-market experience.</h3>
-            <p>Completed municipal, commercial, residential, and roadway projects since launch.</p>
+            <p>Municipal, commercial, residential, and roadway projects delivered since launch.</p>
           </div>
         </div>
       </div>
