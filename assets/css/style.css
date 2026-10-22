@@ -738,6 +738,16 @@ a.cap-card:hover {
   font-size: 1rem;
 }
 
+/* Homepage capabilities: four equal columns from 1200px, where every title fits on one line; 2×2 below. */
+.card-grid--caps .cap-card { padding: 24px; }
+@media (min-width: 1200px) {
+  .card-grid--caps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .card-grid--caps .cap-card h3 { font-size: 1.125rem; }
+}
+@media (max-width: 1199.98px) {
+  .card-grid--caps { grid-template-columns: repeat(2, 1fr); }
+}
+
 .why-num {
   display: block;
   margin-bottom: 18px;

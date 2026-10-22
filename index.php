@@ -38,26 +38,26 @@ layout_start('home');
           <p class="eyebrow">OUR CAPABILITIES</p>
           <h2 id="capabilities-title">Complete civil scope. One capable team.</h2>
         </div>
-        <div class="card-grid" data-stagger>
+        <div class="card-grid card-grid--caps" data-stagger>
           <a class="cap-card" href="/site-development">
             <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="34" width="26" height="8" rx="4"/><path d="M8 34v-9h5l3-6h7v15"/><path d="M17 19v6h6"/><path d="M23 26l10-15 9 7"/><path d="M42 18l2 10h-7z"/></svg>
             <h3>Site Development</h3>
-            <p>Clearing, grading and mass earthwork.</p>
+            <p>Clearing, Grading &amp; Earthwork.</p>
           </a>
           <a class="cap-card" href="/underground-utilities">
             <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><ellipse cx="10" cy="24" rx="5" ry="10"/><ellipse cx="10" cy="24" rx="2" ry="4.5"/><path d="M10 14h22"/><path d="M10 34h22"/><rect x="32" y="11" width="5" height="26" rx="1"/><path d="M37 17h7"/><path d="M37 31h7"/></svg>
             <h3>Underground Utilities</h3>
-            <p>Water, sewer and storm pipe.</p>
+            <p>Water, Sewer &amp; Storm Pipe.</p>
           </a>
           <a class="cap-card" href="/pump-stations">
             <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="20" width="17" height="14" rx="1.5"/><path d="M10 20v14"/><path d="M15 20v14"/><path d="M22 27h3"/><circle cx="32" cy="27" r="7"/><circle cx="32" cy="27" r="2"/><path d="M32 20v-7h10"/><path d="M42 9v8"/><path d="M4 41h40"/><path d="M9 34v7"/><path d="M32 34v7"/></svg>
             <h3>Pump Stations</h3>
-            <p>New construction, rehabilitation and bypass pumping.</p>
+            <p>New Construction, Rehab &amp; Bypass.</p>
           </a>
           <a class="cap-card" href="/roadways-stormwater">
             <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M17 6L6 42"/><path d="M31 6l11 36"/><path d="M24 8v5"/><path d="M24 19v6"/><path d="M24 31v7"/></svg>
             <h3>Roadways &amp; Stormwater</h3>
-            <p>Asphalt, curb and gutter and underground retention.</p>
+            <p>Asphalt, Curb &amp; Underground Retention.</p>
           </a>
         </div>
       </div>
