@@ -34,7 +34,9 @@ $licenseNo = setting('license_number');
         <div class="footer-col">
           <h2 class="footer-heading">Contact</h2>
           <ul class="footer-contact">
+<?php if (setting('contact_name') !== ''): ?>
             <li><?= icon('user') ?><span><?= e(setting('contact_name')) ?></span></li>
+<?php endif; ?>
             <li><?= icon('phone') ?><a href="<?= e(tel_href($phone)) ?>"><?= e($phone) ?></a></li>
             <li><?= icon('mail') ?><a href="mailto:<?= e($email) ?>"><?= e($email) ?></a></li>
             <li><?= icon('pin') ?><span><?= e(setting('city_state')) ?></span></li>

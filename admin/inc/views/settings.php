@@ -1,14 +1,15 @@
 <?php
 defined('ETOWAH_ADMIN') || exit;
 $fields = [
-    'contact_name'   => ['Contact name', 120, 'Shown in the contact band, footer, and Contact page.'],
-    'phone'          => ['Phone', 40, 'Shown everywhere on the site, e.g. 678-763-8047. Phone links are created automatically. The Contact page’s Google description (Pages & SEO) mentions the number too — update it there if it changes.'],
+    'contact_name'   => ['Contact name', 120, 'Shown in the contact band, footer, and Contact page. Leave empty to hide the name there.'],
+    'phone'          => ['Phone', 40, 'Shown everywhere on the site, e.g. (470) 982-4069. Phone links are created automatically. The Contact page’s Google description (Pages & SEO) mentions the number too — update it there if it changes.'],
     'email'          => ['Email', 190, 'The public email address shown on the site.'],
     'city_state'     => ['City and state', 120, 'e.g. Cartersville, Georgia'],
     'license_text'   => ['License text', 160, 'e.g. Licensed Utility Contractor, State of Georgia'],
     'license_number' => ['License number', 40, ''],
     'markets_line'   => ['Markets line (footer)', 160, 'Short line under the logo in the footer.'],
 ];
+$optional = ['contact_name'];
 $errors = [];
 $values = settings_all();
 
@@ -17,7 +18,9 @@ if (is_post()) {
     $new = [];
     foreach ($fields as $key => [$label, $max]) {
         $new[$key] = post_str($key);
-        if ($new[$key] === '' || str_length($new[$key]) > $max) {
+        if (str_length($new[$key]) > $max) {
+            $errors[$key] = $label . ' can be up to ' . $max . ' characters.';
+        } elseif ($new[$key] === '' && !in_array($key, $optional, true)) {
             $errors[$key] = $label . ' is required (up to ' . $max . ' characters).';
         }
     }
@@ -115,8 +118,9 @@ admin_start('Site Settings', 'settings');
                 <div class="form-grid">
 <?php foreach ($fields as $key => [$label, $max, $hint]): ?>
                   <div class="field<?= $cls($key) ?>">
-                    <label for="s-<?= $key ?>"><?= e($label) ?></label>
-                    <input id="s-<?= $key ?>" name="<?= $key ?>" type="<?= $key === 'email' ? 'email' : 'text' ?>" maxlength="<?= $max ?>" required value="<?= e($values[$key] ?? '') ?>">
+<?php $isOptional = in_array($key, $optional, true); ?>
+                    <label for="s-<?= $key ?>"><?= e($label) ?><?= $isOptional ? ' <span class="optional">(optional)</span>' : '' ?></label>
+                    <input id="s-<?= $key ?>" name="<?= $key ?>" type="<?= $key === 'email' ? 'email' : 'text' ?>" maxlength="<?= $max ?>"<?= $isOptional ? '' : ' required' ?> value="<?= e($values[$key] ?? '') ?>">
 <?php if ($hint !== ''): ?>
                     <p class="hint"><?= e($hint) ?></p>
 <?php endif; ?>

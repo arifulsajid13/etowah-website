@@ -25,7 +25,9 @@ layout_start('contact');
           <p class="eyebrow eyebrow--dark">GET IN TOUCH</p>
           <h2>Let’s talk about your project.</h2>
           <ul class="contact-list">
+<?php if (setting('contact_name') !== ''): ?>
             <li><span class="icon-box"><?= icon('user') ?></span><span><?= e(setting('contact_name')) ?></span></li>
+<?php endif; ?>
             <li><span class="icon-box"><?= icon('phone') ?></span><a href="<?= e(tel_href(setting('phone'))) ?>"><?= e(setting('phone')) ?></a></li>
             <li><span class="icon-box"><?= icon('mail') ?></span><a href="mailto:<?= e(setting('email')) ?>"><?= e(setting('email')) ?></a></li>
             <li><span class="icon-box"><?= icon('pin-card') ?></span><span><?= e(setting('city_state')) ?></span></li>

@@ -27,7 +27,7 @@ function seed_database(PDO $pdo): void
         'projects' => ['Projects | Etowah Construction Group', 'Site development, underground utility, pump station, and roadway projects across Georgia and Tennessee.'],
         'about' => ['About | Etowah Construction Group', 'Etowah Construction Group is a licensed Georgia utility contractor in Cartersville delivering site development, underground utility, roadway, and pump-station construction.'],
         'careers' => ['Careers | Etowah Construction Group', 'Join Etowah Construction Group, a licensed Georgia utility contractor in Cartersville. View open positions and apply.'],
-        'contact' => ['Contact | Etowah Construction Group', 'Discuss your site development, underground utility, pump station, or roadway project with Etowah Construction Group. Call 678-763-8047.'],
+        'contact' => ['Contact | Etowah Construction Group', 'Discuss your site development, underground utility, pump station, or roadway project with Etowah Construction Group. Call ' . SETTING_DEFAULTS['phone'] . '.'],
     ];
 
     // [page, slot, label, path, alt, width, height]

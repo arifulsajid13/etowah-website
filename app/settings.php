@@ -5,14 +5,14 @@ declare(strict_types=1);
 
 const SETTING_DEFAULTS = [
     'company_name'             => 'Etowah Construction Group LLC',
-    'contact_name'             => 'Kenny Wallis',
-    'phone'                    => '678-763-8047',
-    'email'                    => 'Kenny@etowahconstruction.com',
+    'contact_name'             => '',   // empty = the name row is hidden everywhere
+    'phone'                    => '(470) 982-4069',
+    'email'                    => 'ECG@etowahconstruction.com',
     'city_state'               => 'Cartersville, Georgia',
     'license_text'             => 'Licensed Utility Contractor, State of Georgia',
     'license_number'           => 'UC002776',
     'markets_line'             => 'Municipal • Commercial • Residential • Roadway',
-    'notify_emails'            => 'Kenny@etowahconstruction.com',
+    'notify_emails'            => 'ECG@etowahconstruction.com',
     'google_site_verification' => '',
     'site_url'                 => '',   // empty = use site_url from app/config.php
     'hide_from_search'         => '1',  // new installs start hidden (demo); switch off at go-live

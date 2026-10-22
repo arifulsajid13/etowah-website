@@ -74,7 +74,7 @@ function storage_path(string $sub = ''): string
     return $sub === '' ? $base : $base . '/' . ltrim($sub, '/');
 }
 
-/** "678-763-8047" → "tel:+16787638047". */
+/** "(470) 982-4069" → "tel:+14709824069". */
 function tel_href(string $phone): string
 {
     $digits = preg_replace('/\D+/', '', $phone);

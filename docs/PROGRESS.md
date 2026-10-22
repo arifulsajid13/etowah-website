@@ -285,33 +285,54 @@ Client request: show every project as finished work, with no "Current", "Complet
 - Both zips rebuilt: update 70 files, hostinger 105 files.
 
 
-## Homepage capability cards ✅ (2026-10-22)
+## Homepage capability cards (client feedback) — 2026-10-22
 
-Client request: on the homepage "Our Capabilities" cards, use the full container width with equal cards, keep every title on one line at 1200px and up, and shorten the descriptions. Only this section changes; the design system stays as it is.
+**Commit:** 74edc8a
 
-- Descriptions in `index.php`:
+**Request:** Client wanted the 4 capability cards to stretch across the page so each fits on 1–2 lines, with shorter descriptions.
+
+**Changes (index.php, assets/css/style.css only):**
+- New `card-grid--caps` class on the homepage grid, so service and About pages are unchanged.
+- Descriptions:
   - Site Development: "Clearing, Grading & Earthwork."
   - Underground Utilities: "Water, Sewer & Storm Pipe."
   - Pump Stations: "New Construction, Rehab & Bypass."
   - Roadways & Stormwater: "Asphalt, Curb & Underground Retention."
-- The homepage grid has a new `card-grid--caps` modifier, so the 3-column `cap-card` grids on the service and About pages are unchanged.
-  - From 1200px: four equal columns (`minmax(0, 1fr)`); title 18px (was 20px).
-  - Padding is 24px at every width (was 28px on desktop, 24px already on tablet).
-  - Below 1200px: 2×2; below 640px: one column.
-- No seed or migration change: these texts live only in `index.php`, not in the database, so new and existing installs get them from the code.
+- 1200px and up: 4 equal-width cards filling the container. Card side padding 28px → 24px, title 20px → 18px, so "Roadways & Stormwater" stays on one line.
+- 640–1199px: 2×2. Below 640px: 1 column.
 
-**Decisions**
-- "Roadways & Stormwater" is 235px wide at 20px, but a 4-column card leaves only 210px at 1200px. Smaller padding alone was not enough, so the title is 18px as well. This leaves 218px at 1200px and 237px at 1280px and up.
-- At 1024px a 4-column card is 222px wide. Even at 18px, two titles wrapped and the Roadways description ran to 3 lines. So the section is 2×2 up to 1199px, where every title and description fits on one line.
+**Decision:** At 1024px the cards show as 2×2 instead of 4 across. At 4 across, titles wrapped and the Roadways description ran to 3 lines.
 
-**Checks**
-- `php -l` passes on `index.php`.
-- Headless Chrome (CDP) at 375, 640, 768, 1024, 1199, 1200, 1280 and 1440px:
-  - every title is on one line at all widths;
-  - descriptions are 1–2 lines;
-  - card widths are equal;
-  - there is no horizontal scroll.
-- Screenshots at 375, 768, 1024 and 1440px look right. The fourth card at 375px shows once it is scrolled into view (reveal animation).
-- Both zips rebuilt:
-  - update: 70 files, with no install/ and no app/config.php;
-  - hostinger: 105 files, with no app/config.php.
+**Not changed:** No database, seed, or migration changes. These texts live in index.php.
+
+**Checked:** Headless browser at 375, 768, 1024, 1200, 1440px: titles on 1 line, descriptions on 1–2 lines, no horizontal scroll.
+
+**Packages:** etowah-update.zip (70 files, no install/, no app/config.php) and etowah-hostinger.zip rebuilt.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+
+## Contact info from settings and optional contact name — 2026-10-23
+
+**Commit:** "Contact info from settings and optional contact name"
+
+**Request:** Client wanted no hardcoded contact details. Phone, email and contact name must come from Site Settings, and the contact name must be optional.
+
+**Changes:**
+- `app/settings.php` (`SETTING_DEFAULTS`, which `app/seed.php` writes on install): phone "(470) 982-4069", email and notification email "ECG@etowahconstruction.com", contact name empty. This was the old "Kenny Wallis" / 678-763-8047 / Kenny@etowahconstruction.com.
+- `app/seed.php`: the Contact page meta description is built from the default phone instead of a hardcoded "Call 678-763-8047."
+- Empty contact name hides the person icon and the name row in the CTA band (`partials/cta-footer.php`), the footer Contact column (`partials/footer-grid.php`) and the Contact page card (`contact.php`). The contact form's success message already said "We will be in touch shortly." when the name was empty. Notification emails never included the name.
+- Site Settings: Contact name is marked "(optional)", has no `required` attribute, and can be saved empty. It is still limited to 120 characters. The Phone hint example is now "(470) 982-4069".
+- `app/helpers.php`: the `tel_href()` comment example is updated. The function already builds `tel:+1` + digits from the phone setting. The forms' JS fallback does the same.
+
+**Not changed:** No migration. Existing sites keep their stored settings until they are changed in the dashboard. The live Contact page meta description ("… Call 678-763-8047.") is stored in the database and must be edited in Pages & SEO.
+
+**Checked:** Local site with a temporary admin user, which was removed afterwards; local settings were restored.
+- Site Settings saved with the contact name empty, then "Test Person".
+- Home, Contact and Careers at 1440 and 375px: the name row is hidden or shown in the CTA band, the footer and the Contact card. Every `tel:` link and the JS fallback give `tel:+14709824069`. There is no horizontal scroll and no console errors.
+- The homepage capability cards are unchanged (`card-grid--caps`, titles on one line at 1200px and up).
+- `php -l` passes on every changed PHP file.
+
+**Packages:** etowah-update.zip (70 files, no install/, no app/config.php) and etowah-hostinger.zip (105 files) rebuilt. No code file in either zip contains the old contact values.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
