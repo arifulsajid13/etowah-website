@@ -283,3 +283,35 @@ Client request: show every project as finished work, with no "Current", "Complet
   - visible text, meta, JSON-LD and alt/aria text have no status wording;
   - every reveal element shows after scrolling, and all images load.
 - Both zips rebuilt: update 70 files, hostinger 105 files.
+
+
+## Homepage capability cards ✅ (2026-10-22)
+
+Client request: on the homepage "Our Capabilities" cards, use the full container width with equal cards, keep every title on one line at 1200px and up, and shorten the descriptions. Only this section changes; the design system stays as it is.
+
+- Descriptions in `index.php`:
+  - Site Development: "Clearing, Grading & Earthwork."
+  - Underground Utilities: "Water, Sewer & Storm Pipe."
+  - Pump Stations: "New Construction, Rehab & Bypass."
+  - Roadways & Stormwater: "Asphalt, Curb & Underground Retention."
+- The homepage grid has a new `card-grid--caps` modifier, so the 3-column `cap-card` grids on the service and About pages are unchanged.
+  - From 1200px: four equal columns (`minmax(0, 1fr)`); title 18px (was 20px).
+  - Padding is 24px at every width (was 28px on desktop, 24px already on tablet).
+  - Below 1200px: 2×2; below 640px: one column.
+- No seed or migration change: these texts live only in `index.php`, not in the database, so new and existing installs get them from the code.
+
+**Decisions**
+- "Roadways & Stormwater" is 235px wide at 20px, but a 4-column card leaves only 210px at 1200px. Smaller padding alone was not enough, so the title is 18px as well. This leaves 218px at 1200px and 237px at 1280px and up.
+- At 1024px a 4-column card is 222px wide. Even at 18px, two titles wrapped and the Roadways description ran to 3 lines. So the section is 2×2 up to 1199px, where every title and description fits on one line.
+
+**Checks**
+- `php -l` passes on `index.php`.
+- Headless Chrome (CDP) at 375, 640, 768, 1024, 1199, 1200, 1280 and 1440px:
+  - every title is on one line at all widths;
+  - descriptions are 1–2 lines;
+  - card widths are equal;
+  - there is no horizontal scroll.
+- Screenshots at 375, 768, 1024 and 1440px look right. The fourth card at 375px shows once it is scrolled into view (reveal animation).
+- Both zips rebuilt:
+  - update: 70 files, with no install/ and no app/config.php;
+  - hostinger: 105 files, with no app/config.php.
