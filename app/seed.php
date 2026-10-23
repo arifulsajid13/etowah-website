@@ -69,7 +69,7 @@ function seed_database(PDO $pdo): void
             'title' => '2.5-Acre Commercial Site', 'slug' => 'alpharetta-commercial', 'status' => 'current',
             'client_name' => null, 'location' => 'Alpharetta, GA', 'market' => 'commercial', 'primary_service' => 'underground-utilities',
             'summary' => 'Full sitework, water, sewer, storm piping, and underground retention.',
-            'description' => 'Completed all site work scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.',
+            'description' => 'Completed all sitework scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.',
             'image' => ['assets/images/projects/alpharetta-commercial-site.jpg', 'Wheel loader working on a commercial site with reinforcing steel and a crane behind'],
             'home_position' => 'card2',
             'services' => [
@@ -117,7 +117,7 @@ function seed_database(PDO $pdo): void
             'title' => 'Family-Owned Grocery Store', 'slug' => 'grocery-store', 'status' => 'completed',
             'client_name' => null, 'location' => null, 'market' => 'commercial', 'primary_service' => 'site-development',
             'summary' => 'Full sitework including grading, utilities, retaining wall, underground stormwater retention, curbing, and asphalt paving.',
-            'description' => 'Full sitework: clearing, grading, storm, sewer and water utilities, retaining wall construction, underground stormwater retention, curbing, and asphalt paving.',
+            'description' => 'Full sitework: clearing, grading, storm, sewer, and water utilities, retaining wall construction, underground stormwater retention, curbing, and asphalt paving.',
             'image' => ['assets/images/projects/grocery-store-sitework.jpg', 'Crew placing concrete paving and curbing on a commercial site'],
             'home_position' => 'none',
             'services' => ['site-development' => [2, null, null]],

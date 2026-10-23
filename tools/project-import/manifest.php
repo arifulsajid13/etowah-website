@@ -66,8 +66,9 @@ return [
             'slug' => 'alpharetta-commercial', 'mode' => 'update', 'folder' => 'Alpharetta',
             'fill' => [
                 'description' => [
-                    'value' => "Completed all site work scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.\n\nPhotos show clearing and grading, deep utility trenches, precast manholes, the underground stormwater modules, and utility work in the adjacent street.",
+                    'value' => "Completed all sitework scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.\n\nPhotos show clearing and grading, deep utility trenches, precast manholes, the underground stormwater modules, and utility work in the adjacent street.",
                     'if' => [
+                        'Completed all sitework scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.',
                         'Completed all site work scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.',
                         'Completing all site work scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond.',
                     ],
@@ -198,10 +199,10 @@ return [
             'project' => [
                 'title' => 'Reliant Market District', 'status' => 'completed', 'client_name' => null, 'location' => null,
                 'market' => 'commercial', 'primary_service' => 'site-development',
-                'summary' => 'Site work for Reliant Market District, including grading, a footing trench with rebar, a storm drain inlet, concrete curb, and asphalt paving.',
-                'description' => "Site work for Reliant Market District. Photos from the site show grading with compact excavators, a PVC cleanout and wood formwork on a building pad, and a storm drain inlet.\n\nLater work included a long footing trench with rebar along the site fence, new concrete curb, and fresh asphalt paving next to the townhomes.",
-                'seo_title' => 'Reliant Market District Site Work | Etowah Construction',
-                'seo_description' => 'Site work at Reliant Market District: grading, a footing trench with rebar, a storm drain inlet, new concrete curb, and asphalt paving.',
+                'summary' => 'Sitework for Reliant Market District, including grading, a footing trench with rebar, a storm drain inlet, concrete curb, and asphalt paving.',
+                'description' => "Sitework for Reliant Market District. Photos from the site show grading with compact excavators, a PVC cleanout and wood formwork on a building pad, and a storm drain inlet.\n\nLater work included a long footing trench with rebar along the site fence, new concrete curb, and fresh asphalt paving next to the townhomes.",
+                'seo_title' => 'Reliant Market District Sitework | Etowah Construction',
+                'seo_description' => 'Sitework at Reliant Market District: grading, a footing trench with rebar, a storm drain inlet, new concrete curb, and asphalt paving.',
                 'services' => ['site-development', 'roadways-stormwater'],
             ],
             'main' => ['file' => 'logo_2026-06-21_11-57-30-961.jpeg', 'crop' => [0, 0.16, 1, 0.66],

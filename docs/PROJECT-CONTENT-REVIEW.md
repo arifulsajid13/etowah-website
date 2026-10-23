@@ -22,7 +22,7 @@ Folder: **Alpharetta**: 19 photos. 1 main photo + 12 gallery photos used.
 | Title | 2.5-Acre Commercial Site (unchanged) |
 | Location | Alpharetta, GA (unchanged; confirmed by the photo location data) |
 | Summary | Full sitework, water, sewer, storm piping, and underground retention. (unchanged) |
-| Description | Completed all site work scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond. (unchanged) |
+| Description | Completed all sitework scopes, including 1,340 LF of sewer piping on and off site, 1,480 LF of water piping on and off site, 1,220 LF of storm piping, and a 52,000-cubic-foot underground retention pond. (unchanged, except "site work" is now spelled "sitework" as on the rest of the site) |
 | Added sentence | Photos show clearing and grading, deep utility trenches, precast manholes, the underground stormwater modules, and utility work in the adjacent street. |
 | SEO title | 2.5-Acre Commercial Site in Alpharetta, GA \| Etowah |
 | Meta description | Commercial sitework in Alpharetta, GA: 1,340 LF of sewer, 1,480 LF of water, 1,220 LF of storm piping, and 52,000 cubic feet of underground retention. |
@@ -33,7 +33,7 @@ Folder: **Alpharetta**: 19 photos. 1 main photo + 12 gallery photos used.
 
 **Questions**
 
-1. Your existing description starts with "Completed all site work scopes…", but your note says this is current work. Should it read "Site work scopes include…" instead?
+1. Your existing description starts with "Completed all sitework scopes…", but your note says this is current work. Should it read "Sitework scopes include…" instead?
 2. Are the black stacked modules the underground retention system?
 3. Is the street trench work part of this project's off-site piping?
 
@@ -165,11 +165,11 @@ Folder: **Reliant Market District**: 4 photos. 1 main photo (cropped to landscap
 | Location | *(left empty: see question 1)* |
 | Market | Commercial |
 | Services | Site Development, Roadways & Stormwater |
-| Summary | Site work for Reliant Market District, including grading, a footing trench with rebar, a storm drain inlet, concrete curb, and asphalt paving. |
-| Description | Site work for Reliant Market District. Photos from the site show grading with compact excavators, a PVC cleanout and wood formwork on a building pad, and a storm drain inlet. |
+| Summary | Sitework for Reliant Market District, including grading, a footing trench with rebar, a storm drain inlet, concrete curb, and asphalt paving. |
+| Description | Sitework for Reliant Market District. Photos from the site show grading with compact excavators, a PVC cleanout and wood formwork on a building pad, and a storm drain inlet. |
 | | Later work included a long footing trench with rebar along the site fence, new concrete curb, and fresh asphalt paving next to the townhomes. |
-| SEO title | Reliant Market District Site Work \| Etowah Construction |
-| Meta description | Site work at Reliant Market District: grading, a footing trench with rebar, a storm drain inlet, new concrete curb, and asphalt paving. |
+| SEO title | Reliant Market District Sitework \| Etowah Construction |
+| Meta description | Sitework at Reliant Market District: grading, a footing trench with rebar, a storm drain inlet, new concrete curb, and asphalt paving. |
 
 - **Visible in the photos:** compact excavators grading, a green PVC cleanout and formwork, a storm drain inlet, a long footing trench with rebar along the fence, new curb, and new asphalt paving with townhomes behind.
 - **Inferred:** "Commercial" as the market (from the name "Market District"). It is not stated that Etowah did the paving or the curb; the text only says the work "included" them.

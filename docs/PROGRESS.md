@@ -539,3 +539,48 @@ Client request: show every project as finished work, with no "Current", "Complet
 - Responsive thumbnails (srcset) for the gallery grid remain the best follow-up for page weight.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+
+## Copy review fixes — 2026-10-23
+
+**Commit:** "Copy review fixes"
+
+**Request:** Review every word on the live site for mistakes, fix what comes from code or seed/import data, and list what must be fixed in the live dashboard.
+
+**Review:**
+- All 20 URLs in the live sitemap.xml were read: 10 main pages, 8 project pages and 2 job pages.
+- Checked: visible text, headings, buttons and links, form labels and messages (including the JS validation messages), footer, meta and Open Graph text, alt text, and JSON-LD.
+- The full table is in `docs/COPY-REVIEW.md`: 19 issues.
+- The "UtilitiContratores" misspelling is in the live Estimator job (title, web address, meta, JSON-LD). That is dashboard data, which is why the earlier search of the repo and the local databases found nothing.
+- Flagged repeats such as "COMMERCIAL Commercial" and "Asphalt Asphalt" are two separate card elements (market label and title, or title and summary), not real repeats.
+
+**Fixed in code or data:**
+- `underground-utilities.php`:
+  - "wet wells, and utility tie-ins" (series comma);
+  - link text "Explore Pump Stations", matching the other "Explore …" links.
+- `app/seed.php` (new installs):
+  - Alpharetta: "sitework" instead of "site work" (the spelling used everywhere else);
+  - grocery store: "storm, sewer, and water utilities".
+- Import manifest:
+  - The Alpharetta description fill now writes "sitework". The live text is still the original, so the import corrects it there. The corrected seed text was added to the list of originals.
+  - Reliant Market District summary, description, SEO title and meta description: "Sitework".
+- `docs/PROJECT-CONTENT-REVIEW.md` updated to match.
+
+**Live dashboard (15 items, see `docs/COPY-REVIEW.md` rows 1–15):**
+- Contact name capitalization.
+- The Contact meta description's old phone number.
+- The Estimator job: title, web address, location, and description grammar and series commas.
+- The Superintendents job description.
+- The grocery store description's series comma.
+
+**Checked:**
+- `php -l` passes on the changed PHP files.
+- The local Underground Utilities page shows the new text.
+- The update zip contains the fixes.
+- The import zip contains no "Site work" values.
+
+**Packages:**
+- `etowah-update.zip`: 73 files, 0.2 MB.
+- `etowah-projects-import.zip`: 83.0 MB, rebuilt for the text changes; photos unchanged.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

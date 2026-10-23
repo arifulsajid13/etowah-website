@@ -39,7 +39,7 @@ layout_start($pageKey);
               <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><ellipse cx="16" cy="24" rx="9" ry="13"/><ellipse cx="16" cy="24" rx="4" ry="6.5"/><path d="M16 11h18c5 0 9 5.8 9 13s-4 13-9 13H16"/></svg>
               <h3>Sanitary Sewer</h3>
               <span class="vline" aria-hidden="true"></span>
-              <p>Sewer mains, manholes, wet wells and utility tie-ins.</p>
+              <p>Sewer mains, manholes, wet wells, and utility tie-ins.</p>
             </li>
             <li class="scope-row">
               <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="13" width="36" height="22" rx="2"/><path d="M12 18v12"/><path d="M18 18v12"/><path d="M24 18v12"/><path d="M30 18v12"/><path d="M36 18v12"/></svg>
@@ -89,7 +89,7 @@ layout_start($pageKey);
         </ul>
         <hr class="proof-divider">
         <p>Experience with pump-station piping, bypass operations, and critical utility connections.</p>
-        <a class="text-link" href="/pump-stations">Explore Pump Station Services <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+        <a class="text-link" href="/pump-stations">Explore Pump Stations <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
       </div>
     </section>
 
