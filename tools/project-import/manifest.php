@@ -7,12 +7,58 @@
  * No invented sizes, footages, dates, client names, budgets, or outcomes. Neutral wording for current work.
  *
  * crop: [left, top, right, bottom] as fractions of the upright photo (applied before resizing).
+ * denoise: light noise reduction for dim interior shots. Every photo also gets the light enhancement in media.php.
+ * A photo may be used at most twice in total (project main or gallery + page slots); the build checks this.
  */
 
 return [
     // Homepage spots. Each is only changed on the live site if it still holds the original (seeded) project.
     'home' => ['card1' => 'alpharetta-commercial', 'card2' => 'chattanooga-rebuild', 'banner' => 'bartow-pump-station'],
     'home_defaults' => ['card1' => 'chattanooga-rebuild', 'card2' => 'alpharetta-commercial', 'banner' => 'cobb-county-asphalt'],
+
+    // Page image slots. On the live site a slot is only replaced while it still holds its placeholder (stock) photo.
+    // Heroes are cropped to 16:9 at 1920 px; proof and team photos 4:3, Markets photos 3:2 at 1600 px; the CTA band 1920 px wide.
+    // Each hero was checked for white-text contrast under the site's dark overlay (desktop and mobile, 95th-percentile brightness).
+    // Kept as stock (no matching real photo): markets/residential (no residential work in the photos) and markets/roadway
+    // (the only two roadway photos are already used twice).
+    'pages' => [
+        ['page' => 'home', 'slot' => 'hero', 'folder' => 'Alpharetta', 'file' => 'logo_2026-10-14_16-29-29-888.jpeg', 'crop' => [0, 0.1, 1, 0.85],
+            'alt' => 'Excavator and dozer working beside stacked underground stormwater modules on a commercial site in Alpharetta, Georgia'],
+        ['page' => 'projects', 'slot' => 'hero', 'folder' => 'Alpharetta', 'file' => 'logo_2026-10-02_16-51-22-000.jpeg', 'crop' => [0, 0.12, 1, 0.87],
+            'alt' => 'Dozer, roller, and skid steer grading a commercial site in Alpharetta, Georgia'],
+        ['page' => 'site-development', 'slot' => 'hero', 'folder' => 'Twigs Farmers Market', 'file' => 'logo_2025-12-13_10-25-40.jpeg', 'crop' => [0, 0.15, 1, 0.9],
+            'alt' => 'Dozer and excavator on mass excavation at the Twigs Farmers Market site'],
+        ['page' => 'site-development', 'slot' => 'proof', 'folder' => 'Alpharetta', 'file' => 'logo_2026-10-16_19-34-23-087.jpeg', 'crop' => [0, 0, 1, 1],
+            'alt' => 'Roller compacting soil near precast manhole sections on a commercial site in Alpharetta, Georgia'],
+        ['page' => 'underground-utilities', 'slot' => 'hero', 'folder' => 'Alpharetta', 'file' => 'logo_2026-09-02_16-58-04-813.jpeg', 'crop' => [0, 0.38, 1, 0.801875],
+            'alt' => 'Crew member laying green PVC pipe in a deep trench beside a compact excavator in Alpharetta, Georgia'],
+        ['page' => 'underground-utilities', 'slot' => 'proof', 'folder' => 'Highway 75 Pump Station', 'file' => 'logo_2026-02-27_14-42-46.jpeg', 'crop' => [0, 0.3, 1, 0.8625],
+            'alt' => 'Ductile iron water line and red gate valve in a trench leading to a precast vault in Bartow County, Georgia'],
+        ['page' => 'pump-stations', 'slot' => 'hero', 'folder' => 'Blue Ridge', 'file' => 'logo_2026-04-01_21-54-43-244.jpeg', 'crop' => [0, 0.3, 1, 0.721875],
+            'alt' => 'Open precast wet well with a lined interior, discharge pipes, and an access ladder in Blue Ridge, Georgia'],
+        ['page' => 'pump-stations', 'slot' => 'proof', 'folder' => 'Tiftonia', 'file' => 'logo_2026-10-11_21-19-56-522.jpeg', 'crop' => [0, 0.25, 1, 0.8125],
+            'alt' => 'Crew working at the base of a deep shored excavation in Tiftonia, Chattanooga, Tennessee'],
+        ['page' => 'roadways-stormwater', 'slot' => 'hero', 'folder' => 'Reliant Market District', 'file' => 'logo_2026-06-21_11-57-30-961.jpeg', 'crop' => [0, 0.2, 1, 0.621875],
+            'alt' => 'New asphalt paving and concrete curb next to townhomes at Reliant Market District'],
+        ['page' => 'roadways-stormwater', 'slot' => 'proof', 'folder' => 'Alpharetta', 'file' => 'logo_2026-08-10_15-34-54-790.jpeg', 'crop' => [0, 0.2, 1, 0.7625],
+            'alt' => 'Trench box and green PVC pipe in a trench cut along a public street in Alpharetta, Georgia'],
+        ['page' => 'markets', 'slot' => 'hero', 'folder' => 'Highway 75 Pump Station', 'file' => 'logo_2026-04-08_12-58-10-113.jpeg', 'crop' => [0, 0.15, 1, 0.9],
+            'alt' => 'Two precast concrete vaults set in an open excavation in Bartow County, Georgia'],
+        ['page' => 'markets', 'slot' => 'municipal', 'folder' => 'Highway 75 Pump Station', 'file' => 'HWY 75 PS_20251111_155425.jpg', 'crop' => [0, 0.3, 1, 0.8],
+            'alt' => 'Large flanged pipe and tee inside the concrete structure of a water pump station in Bartow County, Georgia'],
+        ['page' => 'markets', 'slot' => 'commercial', 'folder' => 'Alpharetta', 'file' => 'logo_2026-10-20_14-32-05-410.jpeg', 'crop' => [0, 0, 1, 0.889],
+            'alt' => 'Excavator digging beside precast manholes and stacked underground stormwater modules on a commercial site in Alpharetta, Georgia'],
+        ['page' => 'about', 'slot' => 'hero', 'folder' => 'Highway 75 Pump Station', 'file' => 'logo_2025-07-03_10-23-41.jpeg', 'crop' => [0, 0.2, 1, 0.621875],
+            'alt' => 'Crew setting a precast manhole on a large pipe in a trench in Bartow County, Georgia'],
+        ['page' => 'about', 'slot' => 'team', 'folder' => 'Highway 75 Pump Station', 'file' => 'logo_2026-04-08_12-55-51-715.jpeg', 'crop' => [0, 0.25, 1, 0.8125],
+            'alt' => 'Two crew members connecting a valve on a large water line inside a trench box in Bartow County, Georgia'],
+        ['page' => 'careers', 'slot' => 'hero', 'folder' => 'Alpharetta', 'file' => 'logo_2026-10-12_17-22-46-480.jpeg', 'crop' => [0, 0.2, 1, 0.621875],
+            'alt' => 'Crew member at the base of a precast manhole with green PVC pipe in a deep trench in Alpharetta, Georgia'],
+        ['page' => 'contact', 'slot' => 'hero', 'folder' => 'Alpharetta', 'file' => 'logo_2026-07-16_16-54-58-363.jpeg', 'crop' => [0, 0.18, 1, 0.601875],
+            'alt' => 'Excavator on a cleared commercial site in Alpharetta, Georgia'],
+        ['page' => 'global', 'slot' => 'cta-bg', 'folder' => 'Highway 75 Pump Station', 'file' => 'logo_2025-07-22_19-35-36.jpeg', 'crop' => [0, 0, 1, 0.571],
+            'alt' => 'Excavator grading below a wooded slope at the pump station site in Bartow County, Georgia'],
+    ],
 
     'projects' => [
         // ---------------------------------------------------------------- existing: Alpharetta (current work)
@@ -88,7 +134,7 @@ return [
                 ['file' => 'logo_2025-08-28_15-10-16.jpeg', 'alt' => 'Rebar cages and forms for the concrete pump station structure, with large pipe set in place, in Bartow County, Georgia'],
                 ['file' => 'logo_2025-09-17_12-32-23.jpeg', 'alt' => 'Concrete walls of the pump station structure inside the excavation in Bartow County, Georgia'],
                 ['file' => 'HWY 75 PS_20251111_155425.jpg', 'alt' => 'Large flanged pipe and tee inside the concrete pump station structure in Bartow County, Georgia'],
-                ['file' => 'logo_2026-07-16_15-51-31-277.jpeg', 'alt' => 'Blue valves and station piping inside the pump station in Bartow County, Georgia'],
+                ['file' => 'logo_2026-07-16_15-51-31-277.jpeg', 'denoise' => true, 'alt' => 'Blue valves and station piping inside the pump station in Bartow County, Georgia'],
                 ['file' => 'logo_2025-07-03_10-23-41.jpeg', 'alt' => 'Crew setting a precast manhole on a large pipe in a trench at the pump station site in Bartow County, Georgia'],
                 ['file' => 'logo_2025-09-16_09-02-02.jpeg', 'alt' => 'Restrained-joint ductile iron pipe entering a precast structure in Bartow County, Georgia'],
                 ['file' => 'logo_2026-02-27_14-42-46.jpeg', 'alt' => 'Ductile iron water line and red gate valve leading to a precast vault in Bartow County, Georgia'],
@@ -114,8 +160,8 @@ return [
             'gallery' => [
                 ['file' => 'logo_2026-04-01_21-54-42-850.jpeg', 'alt' => 'Precast wet well top with hatch framing, with trailer-mounted pumps and a telehandler on site in Blue Ridge, Georgia'],
                 ['file' => 'logo_2026-04-01_21-54-43-244.jpeg', 'alt' => 'Open precast wet well with a lined interior, discharge pipes, and an access ladder in Blue Ridge, Georgia'],
-                ['file' => 'logo_2026-04-22_17-14-44-631.jpeg', 'alt' => 'Looking down into the lined wet well with guide rails and a ventilation duct in Blue Ridge, Georgia'],
-                ['file' => 'logo_2026-05-07_16-27-51-963.jpeg', 'alt' => 'Two submersible pumps at the bottom of the wet well in Blue Ridge, Georgia'],
+                ['file' => 'logo_2026-04-22_17-14-44-631.jpeg', 'denoise' => true, 'alt' => 'Looking down into the lined wet well with guide rails and a ventilation duct in Blue Ridge, Georgia'],
+                ['file' => 'logo_2026-05-07_16-27-51-963.jpeg', 'denoise' => true, 'alt' => 'Two submersible pumps at the bottom of the wet well in Blue Ridge, Georgia'],
             ],
         ],
 

@@ -474,3 +474,68 @@ Client request: show every project as finished work, with no "Current", "Complet
 **Open questions:** see `docs/PROJECT-CONTENT-REVIEW.md`. The main ones are the Twigs and Reliant locations, and confirmation of the Tiftonia and Highway 75 matches.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+
+## Enhance real photos and replace stock images — 2026-10-23
+
+**Commit:** "Enhance real photos and replace stock images"
+
+**Request:**
+1. Give every real client photo (projects and pages) a light enhancement with free local tools, staying true to the work.
+2. Replace the stock photos in the page image slots with real photos where a good match exists, delivered through Admin → Import. Only placeholders are replaced.
+
+**Tools:**
+- ImageMagick 7.1.2 (installed with winget, `ImageMagick.ImageMagick`). Python and Pillow are not on this machine.
+- Real-ESRGAN was not needed: every crop is at least as large as its target, and the build fails if a photo would need upscaling.
+
+**Enhancement (`tools/project-import/media.php`, used by the build):**
+- **Pipeline:** EXIF orientation → optional straighten → crop → Lanczos resize (ImageMagick) → light enhancement → JPG q80 + WebP q78 by GD, so the dashboard settings and the no-metadata check are kept.
+- **Levels:** black and white points from the 0.3% / 99.7% luminance percentiles, applied equally to R, G and B (no colour shift). At most 5% black and 8% white range is clipped.
+- **Exposure:** a midtone gamma moving the mean 40% of the way to 0.45, limited to 0.93–1.2.
+- **Contrast:** sigmoidal 1.5 at 50%.
+- **Sharpening:** unsharp 0x0.7, amount 0.4, threshold 8%. The threshold keeps gravel and dirt texture, and file size, from being amplified.
+- **Noise reduction:** `-enhance` before resizing, only for the 3 dim interior photos (Blue Ridge wet well and pumps, Bartow station piping).
+- **Not done:**
+  - Straightening: no photo was clearly tilted (wide-angle lens curvature was left alone).
+  - Any generative or content edits.
+  - Video and poster: left unchanged.
+- **Bug found and fixed:** on Windows, PHP's `escapeshellarg()` turns `%` and `!` into spaces, which blew out the first test (`-level 5%,…` was read as absolute values). ImageMagick now runs through `proc_open()` with an argument array, with no shell in between.
+- **Samples:** `php tools/build-project-import.php --samples` writes 3 side-by-side before/after JPGs to `docs/enhance-samples/`: Twigs mass excavation (overcast, flat light), Blue Ridge wet well (dim, with noise reduction), and the Reliant paving crop.
+
+**Page photos (manifest `pages`):**
+- 18 of 20 slots use real photos. Each source photo is used at most twice in total (project main or gallery + page slots); the build fails otherwise.
+- **Heroes:**
+  - Cropped 16:9 at 1920px. The CTA band is 1920 wide at 2.33:1, proof and team photos are 4:3 at 1600px, Markets photos 3:2 at 1600px.
+  - Each hero was chosen with a contrast check: white text against the 95th-percentile brightness behind the heading, under the real overlay gradients (desktop band and mobile columns).
+  - The chosen heroes measured 5.2:1 or better on desktop and 7.2:1 or better on mobile; the stock home hero measured 3.4:1 on desktop.
+- **Avoided duplicates on the same page:** Roadways & Stormwater already shows the Twigs card with the stormwater photo, so its hero is the Reliant paving photo. The first Careers choice (Twigs crew) hid the crew under the overlay, so it is now Alpharetta #14 (crew member at a manhole, right of the text).
+- **Kept as stock:**
+  - `markets/residential`: no residential work in the photos.
+  - `markets/roadway`: the only two roadway photos, Reliant paving and the Alpharetta street trench, are already used twice.
+- Slot-by-slot list and alt text: `docs/PROJECT-CONTENT-REVIEW.md` → Page photos.
+
+**Import changes (`admin/inc/import.php`, view):**
+- **Page photos:** `pages` entries replace a slot only while `is_placeholder = 1`; a photo the client uploaded is shown as "Kept your photo". Files go to `uploads/pages/` (added to the allowed folders).
+- **Newer versions:** the enhanced photos have revision-2 names, and each lists the revision-1 path it `replaces`. A site that already imported the first package gets the files swapped in place: same row, description and order, new path and size. The old JPG/WebP are deleted after the commit, and nothing is duplicated.
+- **Preview:** shows page photos (replace / kept / already imported) and "N photos updated to a newer version".
+
+**Checked locally** (temporary admin users and the extra database were removed afterwards; `app/config.php` restored to `etowah_local`):
+- **Upgrade path** (`etowah_import_test`, which already held the first package):
+  - 46 photos were swapped in place and 18 page photos replaced; gallery rows stayed at 41 with no duplicates.
+  - 92 old files were deleted and 128 new ones added.
+  - A second run: "Already imported" for all 24 items.
+  - The Careers slot, reset to stock and re-imported, was replaced alone.
+- **Fresh copy of the current local data**, with the Contact hero changed beforehand as if in the dashboard: 3 new and 3 updated projects, 46 photos, 1 video and 17 page photos added. Contact was kept, and 2 slots stay stock.
+- **Pages:** Puppeteer with Chrome at 375 and 1440px covered Home, Projects, the 4 services, Markets, About, Careers, Contact and 3 project pages, all serving the new WebP heroes. There were no console errors, failed requests or overflow. Heroes, proof sections, Markets sections, the About team photo and the CTA band were reviewed in screenshots.
+- `php -l` passes on all changed PHP files.
+
+**Packages:**
+- `etowah-update.zip`: 73 files, 0.2 MB.
+- `etowah-hostinger.zip`: 107 files, 6.0 MB.
+- `etowah-projects-import.zip`: 83.0 MB, 132 entries.
+
+**Notes:**
+- Enhanced photos are larger: gallery JPG median 635 KB against 536 KB before. Most of the growth comes from the sharper Lanczos resize and the contrast step; sharpening adds about 10%.
+- Responsive thumbnails (srcset) for the gallery grid remain the best follow-up for page weight.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

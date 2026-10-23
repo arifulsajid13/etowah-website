@@ -7,10 +7,12 @@ defined('ETOWAH_ADMIN') || exit;
  *
  * Safe to run more than once: projects match by slug, media by file path, and nothing is duplicated.
  * Never overwrites the client's own edits: a text field is only filled when it is empty or still holds the original text,
- * a main photo is only replaced while it is a placeholder, and a homepage spot only moves while it holds its original project.
+ * a main photo or page photo is only replaced while it is a placeholder, and a homepage spot only moves while it holds its original project.
+ * A photo that replaces one from an earlier package (listed in "replaces", e.g. an enhanced version) swaps the file in place,
+ * keeping the description and order; the old file is deleted after the import.
  */
 
-const IMPORT_MEDIA_DIRS = ['projects', 'project-gallery', 'project-video'];
+const IMPORT_MEDIA_DIRS = ['projects', 'project-gallery', 'project-video', 'pages'];
 const IMPORT_FILL_FIELDS = ['location' => 120, 'summary' => 300, 'description' => 5000, 'seo_title' => 70, 'seo_description' => 170, 'client_name' => 200];
 const IMPORT_MEDIA_FILE = '#^media/[a-f0-9]{32}\.(jpg|webp|mp4)$#';
 
@@ -111,6 +113,15 @@ function import_load(string $dir): array
             $media((array) $m, $where);
         }
     }
+    foreach ((array) ($data['pages'] ?? []) as $s) {
+        $where = 'Page photo ' . ($s['page'] ?? '?') . '/' . ($s['slot'] ?? '?');
+        if (!preg_match('/^[a-z0-9-]{1,40}$/', (string) ($s['page'] ?? '')) || !preg_match('/^[a-z0-9-]{1,40}$/', (string) ($s['slot'] ?? ''))
+            || ($s['dir'] ?? '') !== 'pages' || str_length((string) ($s['alt'] ?? '')) > 255) {
+            $problems[] = "$where: invalid page, slot, or description.";
+            continue;
+        }
+        $media((array) $s + ['type' => 'image'], $where);
+    }
     return [$data, $problems];
 }
 
@@ -120,10 +131,10 @@ function import_load(string $dir): array
  */
 function import_plan(array $data): array
 {
-    $plan = ['projects' => [], 'home' => [], 'totals' => ['new' => 0, 'updated' => 0, 'photos' => 0, 'videos' => 0]];
+    $plan = ['projects' => [], 'home' => [], 'pages' => [], 'totals' => ['new' => 0, 'updated' => 0, 'photos' => 0, 'videos' => 0, 'upgraded' => 0, 'pages' => 0]];
     foreach ($data['projects'] as $p) {
         $current = db_one('SELECT * FROM projects WHERE slug = ?', [$p['slug']]);
-        $item = ['slug' => $p['slug'], 'src' => $p, 'current' => $current, 'fill' => [], 'kept' => [], 'main' => null, 'add' => [], 'skipped' => 0, 'notes' => []];
+        $item = ['slug' => $p['slug'], 'src' => $p, 'current' => $current, 'fill' => [], 'kept' => [], 'main' => null, 'add' => [], 'upgrade' => [], 'skipped' => 0, 'notes' => []];
         if (!$current && $p['mode'] === 'update') {
             $item['action'] = 'missing';
             $item['notes'][] = 'Not found on this site, so it was left out.';
@@ -150,15 +161,19 @@ function import_plan(array $data): array
         if (!$current) {
             $item['main'] = $main + ['path' => $mainPath];
         } elseif ($current['image_path'] !== $mainPath) {
-            if ((int) $current['is_placeholder_image'] === 1 || $current['image_path'] === '') {
+            if (in_array($current['image_path'], (array) ($main['replaces'] ?? []), true)) {
+                // A newer version of the photo an earlier package imported (e.g. enhanced): swap the file, keep the description.
+                $item['main'] = $main + ['path' => $mainPath, 'old' => $current['image_path']];
+            } elseif ((int) $current['is_placeholder_image'] === 1 || $current['image_path'] === '') {
                 $item['main'] = $main + ['path' => $mainPath];
             } else {
                 $item['notes'][] = 'Main photo kept: this project already has a real photo.';
             }
         }
 
-        $have = $current ? db_all('SELECT media_type, path FROM project_images WHERE project_id = ?', [$current['id']]) : [];
+        $have = $current ? db_all('SELECT id, media_type, path FROM project_images WHERE project_id = ?', [$current['id']]) : [];
         $paths = array_column($have, 'path');
+        $ids = array_column($have, 'id', 'path');
         $room = [
             'image' => GALLERY_MAX - count(array_filter($have, fn($r) => $r['media_type'] === 'image')),
             'video' => VIDEO_GALLERY_MAX - count(array_filter($have, fn($r) => $r['media_type'] === 'video')),
@@ -167,6 +182,11 @@ function import_plan(array $data): array
             $type = ($m['type'] ?? 'image') === 'video' ? 'video' : 'image';
             $path = 'uploads/' . $m['dir'] . '/' . basename($m['file']);
             if (in_array($path, $paths, true)) {
+                continue;
+            }
+            $old = array_values(array_intersect((array) ($m['replaces'] ?? []), $paths))[0] ?? null;
+            if ($old !== null) {
+                $item['upgrade'][] = $m + ['type' => $type, 'path' => $path, 'id' => (int) $ids[$old], 'old' => $old];
                 continue;
             }
             if ($room[$type] <= 0) {
@@ -180,7 +200,7 @@ function import_plan(array $data): array
             $item['notes'][] = $item['skipped'] . ' gallery item(s) left out: the gallery is full (' . GALLERY_MAX . ' photos, ' . VIDEO_GALLERY_MAX . ' videos).';
         }
 
-        $changes = $item['fill'] || $item['main'] || $item['add'];
+        $changes = $item['fill'] || $item['main'] || $item['add'] || $item['upgrade'];
         if ($item['action'] === 'update' && !$changes) {
             $item['action'] = 'unchanged';
         }
@@ -189,7 +209,9 @@ function import_plan(array $data): array
         } elseif ($item['action'] === 'update') {
             $plan['totals']['updated']++;
         }
-        $plan['totals']['photos'] += ($item['main'] ? 1 : 0) + count(array_filter($item['add'], fn($m) => $m['type'] === 'image'));
+        $mainUpgrade = isset($item['main']['old']);
+        $plan['totals']['upgraded'] += ($mainUpgrade ? 1 : 0) + count($item['upgrade']);
+        $plan['totals']['photos'] += ($item['main'] && !$mainUpgrade ? 1 : 0) + count(array_filter($item['add'], fn($m) => $m['type'] === 'image'));
         $plan['totals']['videos'] += count(array_filter($item['add'], fn($m) => $m['type'] === 'video'));
         $plan['projects'][] = $item;
     }
@@ -211,6 +233,29 @@ function import_plan(array $data): array
         }
         $original = ($data['home_defaults'][$slot] ?? '') === ($holder['slug'] ?? '');
         $plan['home'][] = ['slot' => $slot, 'slug' => $slug, 'title' => $title, 'from' => $holder['title'] ?? '', 'apply' => !$holder || $original];
+    }
+
+    // Page photos replace only placeholders (a photo the client uploaded in the dashboard is kept),
+    // or a photo from an earlier package that this one supersedes.
+    foreach ((array) ($data['pages'] ?? []) as $s) {
+        $row = db_one('SELECT id, label, path, is_placeholder FROM page_images WHERE page_key = ? AND slot = ?', [$s['page'], $s['slot']]);
+        $path = 'uploads/pages/' . basename($s['file']);
+        $entry = $s + ['path' => $path, 'label' => $row['label'] ?? "{$s['page']}/{$s['slot']}", 'id' => (int) ($row['id'] ?? 0)];
+        if (!$row) {
+            $entry['action'] = 'missing';
+        } elseif ($row['path'] === $path) {
+            $entry['action'] = 'same';
+        } elseif (in_array($row['path'], (array) ($s['replaces'] ?? []), true)) {
+            $entry['action'] = 'upgrade';
+            $entry['old'] = $row['path'];
+            $plan['totals']['upgraded']++;
+        } elseif ((int) $row['is_placeholder'] === 1) {
+            $entry['action'] = 'replace';
+            $plan['totals']['pages']++;
+        } else {
+            $entry['action'] = 'kept';
+        }
+        $plan['pages'][] = $entry;
     }
     return $plan;
 }
@@ -245,6 +290,8 @@ function import_run(array $plan, string $dir): string
         }
     };
 
+    $pages = array_filter($plan['pages'] ?? [], fn($s) => in_array($s['action'], ['replace', 'upgrade'], true));
+    $superseded = [];
     $pdo = db();
     try {
         foreach ($plan['projects'] as $item) {
@@ -252,7 +299,9 @@ function import_run(array $plan, string $dir): string
                 $copyMedia($item['main']);
             }
             array_map($copyMedia, $item['add']);
+            array_map($copyMedia, $item['upgrade']);
         }
+        array_map($copyMedia, $pages);
 
         $pdo->beginTransaction();
         foreach ($plan['projects'] as $item) {
@@ -283,11 +332,20 @@ function import_run(array $plan, string $dir): string
                 foreach ($item['fill'] as $field => $value) {
                     db_run("UPDATE projects SET {$field} = ? WHERE id = ?", [$value, $projectId]); // field names come from IMPORT_FILL_FIELDS
                 }
-                if ($item['main']) {
+                if ($item['main'] && isset($item['main']['old'])) {
+                    $m = $item['main'];
+                    db_run('UPDATE projects SET image_path = ?, image_width = ?, image_height = ? WHERE id = ?', [$m['path'], (int) $m['width'], (int) $m['height'], $projectId]);
+                    $superseded[] = $m['old'];
+                } elseif ($item['main']) {
                     $m = $item['main'];
                     db_run('UPDATE projects SET image_path = ?, image_alt = ?, image_width = ?, image_height = ?, is_placeholder_image = 0 WHERE id = ?',
                         [$m['path'], mb_substr($m['alt'], 0, 255), (int) $m['width'], (int) $m['height'], $projectId]);
                 }
+            }
+            // Newer versions of earlier imported gallery photos: same row (description and order kept), new file.
+            foreach ($item['upgrade'] as $m) {
+                db_run('UPDATE project_images SET path = ?, width = ?, height = ? WHERE id = ?', [$m['path'], (int) $m['width'], (int) $m['height'], $m['id']]);
+                $superseded[] = $m['old'];
             }
             foreach ($item['add'] as $m) {
                 $order = (int) db_value('SELECT COALESCE(MAX(sort_order), 0) + 10 FROM project_images WHERE project_id = ?', [$projectId]);
@@ -309,6 +367,15 @@ function import_run(array $plan, string $dir): string
                 db_run('UPDATE projects SET home_position = ? WHERE slug = ?', [$h['slot'], $h['slug']]);
             }
         }
+        foreach ($pages as $s) {
+            if ($s['action'] === 'upgrade') {
+                db_run('UPDATE page_images SET path = ?, width = ?, height = ? WHERE id = ?', [$s['path'], (int) $s['width'], (int) $s['height'], $s['id']]);
+                $superseded[] = $s['old'];
+            } else {
+                db_run('UPDATE page_images SET path = ?, alt = ?, width = ?, height = ?, is_placeholder = 0 WHERE id = ? AND is_placeholder = 1',
+                    [$s['path'], mb_substr((string) $s['alt'], 0, 255), (int) $s['width'], (int) $s['height'], $s['id']]);
+            }
+        }
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
@@ -320,9 +387,15 @@ function import_run(array $plan, string $dir): string
         throw $e instanceof RuntimeException ? $e : new RuntimeException('The import failed and nothing was changed. ' . $e->getMessage());
     }
 
+    // Files of photos that were swapped for newer versions (import-owned uploads only; never /assets).
+    foreach ($superseded as $old) {
+        image_delete_upload($old);
+    }
+
     $t = $plan['totals'];
-    return sprintf('%d new project%s, %d updated, %d photo%s and %d video%s added.',
-        $t['new'], $t['new'] === 1 ? '' : 's', $t['updated'], $t['photos'], $t['photos'] === 1 ? '' : 's', $t['videos'], $t['videos'] === 1 ? '' : 's');
+    return sprintf('%d new project%s, %d updated, %d photo%s and %d video%s added, %d page photo%s replaced, %d photo%s updated to a newer version.',
+        $t['new'], $t['new'] === 1 ? '' : 's', $t['updated'], $t['photos'], $t['photos'] === 1 ? '' : 's', $t['videos'], $t['videos'] === 1 ? '' : 's',
+        $t['pages'], $t['pages'] === 1 ? '' : 's', $t['upgraded'], $t['upgraded'] === 1 ? '' : 's');
 }
 
 /** Sort order right after another project when there is room before the next one; otherwise at the end. */

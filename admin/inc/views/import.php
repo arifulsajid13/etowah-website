@@ -30,6 +30,8 @@ if (is_post()) {
 [$data, $problems] = import_load($dir);
 $plan = $data ? import_plan($data) : null;
 $fieldLabels = ['location' => 'Location', 'summary' => 'Short summary', 'description' => 'Full description', 'seo_title' => 'SEO title', 'seo_description' => 'Meta description', 'client_name' => 'Client name'];
+$pageLabels = ['replace' => ['Replaces the placeholder', 'badge--new'], 'upgrade' => ['Newer version', 'badge--reviewing'], 'same' => ['Already imported', 'badge--ok'],
+    'kept' => ['Kept your photo', 'badge--closed'], 'missing' => ['Slot not found', 'badge--closed']];
 $actionLabels = ['new' => ['New project', 'badge--new'], 'update' => ['Update', 'badge--reviewing'], 'unchanged' => ['Already imported', 'badge--ok'], 'missing' => ['Not found', 'badge--closed']];
 
 admin_start('Import projects', 'projects');
@@ -57,7 +59,7 @@ admin_start('Import projects', 'projects');
             <h2>Preview</h2>
             <span class="hint">Package built <?= e((string) ($data['built'] ?? '')) ?></span>
           </div>
-          <p><strong><?= $t['new'] ?></strong> new project<?= $t['new'] === 1 ? '' : 's' ?> · <strong><?= $t['updated'] ?></strong> updated · <strong><?= $t['photos'] ?></strong> photo<?= $t['photos'] === 1 ? '' : 's' ?> and <strong><?= $t['videos'] ?></strong> video<?= $t['videos'] === 1 ? '' : 's' ?> to add</p>
+          <p><strong><?= $t['new'] ?></strong> new project<?= $t['new'] === 1 ? '' : 's' ?> · <strong><?= $t['updated'] ?></strong> updated · <strong><?= $t['photos'] ?></strong> photo<?= $t['photos'] === 1 ? '' : 's' ?> and <strong><?= $t['videos'] ?></strong> video<?= $t['videos'] === 1 ? '' : 's' ?> to add · <strong><?= $t['pages'] ?></strong> page photo<?= $t['pages'] === 1 ? '' : 's' ?> to replace<?php if ($t['upgraded']): ?> · <strong><?= $t['upgraded'] ?></strong> photo<?= $t['upgraded'] === 1 ? '' : 's' ?> updated to a newer version<?php endif; ?></p>
           <table class="table">
             <thead><tr><th scope="col">Project</th><th scope="col">Action</th><th scope="col">What changes</th></tr></thead>
             <tbody>
@@ -66,8 +68,11 @@ admin_start('Import projects', 'projects');
                 <td data-label="Project"><strong><?= e($item['title'] ?? $item['slug']) ?></strong><span class="cell-sub">/projects/<?= e($item['slug']) ?></span></td>
                 <td data-label="Action"><span class="badge <?= $badge ?>"><?= $label ?></span></td>
                 <td data-label="What changes">
-<?php if ($item['main']): ?>
+<?php if ($item['main'] && !isset($item['main']['old'])): ?>
                   <span class="cell-sub">Main photo: <?= $item['action'] === 'new' ? 'added' : 'replaces the placeholder' ?></span>
+<?php endif; ?>
+<?php $upgrades = count($item['upgrade']) + (isset($item['main']['old']) ? 1 : 0); if ($upgrades): ?>
+                  <span class="cell-sub"><?= $upgrades ?> photo<?= $upgrades === 1 ? '' : 's' ?> updated to a newer version (descriptions and order kept)</span>
 <?php endif; ?>
 <?php if ($item['add']): $v = count(array_filter($item['add'], fn($m) => $m['type'] === 'video')); $ph = count($item['add']) - $v; ?>
                   <span class="cell-sub">Gallery: <?= $ph ?> photo<?= $ph === 1 ? '' : 's' ?><?= $v ? ', ' . $v . ' video' . ($v === 1 ? '' : 's') : '' ?> added</span>
@@ -97,7 +102,22 @@ admin_start('Import projects', 'projects');
 <?php endforeach; ?>
           </ul>
 <?php endif; ?>
-<?php if (!$problems && ($t['new'] || $t['updated'] || array_filter($plan['home'], fn($h) => $h['apply']))): ?>
+<?php if ($plan['pages']): ?>
+          <h3 class="subhead">Page photos</h3>
+          <table class="table">
+            <thead><tr><th scope="col">Page</th><th scope="col">Photo</th><th scope="col">Action</th></tr></thead>
+            <tbody>
+<?php foreach ($plan['pages'] as $s): [$label, $badge] = $pageLabels[$s['action']]; ?>
+              <tr>
+                <td data-label="Page"><?= e(PAGES[$s['page']][1] ?? ($s['page'] === 'global' ? 'All pages' : ucfirst($s['page']))) ?></td>
+                <td data-label="Photo"><?= e($s['label']) ?><span class="cell-sub"><?= e($s['alt']) ?></span></td>
+                <td data-label="Action"><span class="badge <?= $badge ?>"><?= $label ?></span></td>
+              </tr>
+<?php endforeach; ?>
+            </tbody>
+          </table>
+<?php endif; ?>
+<?php if (!$problems && ($t['new'] || $t['updated'] || $t['pages'] || $t['upgraded'] || array_filter($plan['home'], fn($h) => $h['apply']))): ?>
           <form method="post" class="button-row" data-confirm="Import these projects, photos, and videos now? The package files are deleted afterwards." data-confirm-ok="Yes, import">
             <?= csrf_field() ?>
             <button class="btn btn--primary" type="submit">Import</button>

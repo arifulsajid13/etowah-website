@@ -192,3 +192,59 @@ Folder: **Reliant Market District**: 4 photos. 1 main photo (cropped to landscap
 - **Projects page order:** the new projects come right after the Water Pump Station, so the six projects with real photos are listed first. The projects that still use placeholder photos follow.
 
 The other existing projects (Sewage Pump Station Rehabilitation, 5.5 Miles of Roadway Asphalt, the neighborhood, the grocery store, and the storage facility) are unchanged and still use placeholder photos. Send real photos of those when you have them.
+
+---
+
+## Photo enhancement
+
+Every photo of yours on the website (projects and pages) got the same light, automatic touch-up. Your original files are untouched.
+
+- **Levels and exposure:** a small brightness and contrast correction. It is measured on each photo and applied equally to all colours, so colours do not shift.
+- **Gentle contrast:** a small boost to midtone contrast.
+- **Sharpening:** a mild sharpening of edges at the final size. Flat surfaces such as gravel and dirt are left alone.
+- **Noise reduction:** applied only to three dim interior photos (inside the Blue Ridge wet well, the two submersible pumps, and the station piping in Bartow County).
+
+Nothing was added, removed, or changed in any photo: no objects, people, equipment, or text, and no generative fill.
+
+- **Straightening:** no photo was clearly tilted, so none was straightened. The curved edges in some wide shots come from the phone's wide-angle lens and were left as they are.
+- **Upscaling:** no photo was smaller than the size the website needs, so nothing was upscaled.
+- **Video:** the video and its poster frame were left as they were.
+
+Three before/after examples are in `docs/enhance-samples/`.
+
+## Page photos
+
+Stock photos on the website pages were replaced with your photos wherever one fits the subject. On your live site, the import only replaces a page photo that is still the original stock photo. A photo you already changed in the dashboard is kept. Each of your photos appears at most twice across the whole site.
+
+| Page / slot | Your photo (folder) | Photo description (alt text) |
+|---|---|---|
+| Home — hero | Alpharetta | Excavator and dozer working beside stacked underground stormwater modules on a commercial site in Alpharetta, Georgia |
+| Projects — hero | Alpharetta | Dozer, roller, and skid steer grading a commercial site in Alpharetta, Georgia |
+| Site Development — hero | Twigs Farmers Market | Dozer and excavator on mass excavation at the Twigs Farmers Market site |
+| Site Development — "Full site packages" | Alpharetta | Roller compacting soil near precast manhole sections on a commercial site in Alpharetta, Georgia |
+| Underground Utilities — hero | Alpharetta | Crew member laying green PVC pipe in a deep trench beside a compact excavator in Alpharetta, Georgia |
+| Underground Utilities — "Complex utility work" | Highway 75 Pump Station | Ductile iron water line and red gate valve in a trench leading to a precast vault in Bartow County, Georgia |
+| Pump Stations — hero | Blue Ridge | Open precast wet well with a lined interior, discharge pipes, and an access ladder in Blue Ridge, Georgia |
+| Pump Stations — "Deep excavation" | Tiftonia | Crew working at the base of a deep shored excavation in Tiftonia, Chattanooga, Tennessee |
+| Roadways & Stormwater — hero | Reliant Market District | New asphalt paving and concrete curb next to townhomes at Reliant Market District |
+| Roadways & Stormwater — "Public roadway work" | Alpharetta | Trench box and green PVC pipe in a trench cut along a public street in Alpharetta, Georgia |
+| Markets — hero | Highway 75 Pump Station | Two precast concrete vaults set in an open excavation in Bartow County, Georgia |
+| Markets — Municipal | Highway 75 Pump Station | Large flanged pipe and tee inside the concrete structure of a water pump station in Bartow County, Georgia |
+| Markets — Commercial | Alpharetta | Excavator digging beside precast manholes and stacked underground stormwater modules on a commercial site in Alpharetta, Georgia |
+| About — hero | Highway 75 Pump Station | Crew setting a precast manhole on a large pipe in a trench in Bartow County, Georgia |
+| About — "Who we are" | Highway 75 Pump Station | Two crew members connecting a valve on a large water line inside a trench box in Bartow County, Georgia |
+| Careers — hero | Alpharetta | Crew member at the base of a precast manhole with green PVC pipe in a deep trench in Alpharetta, Georgia |
+| Contact — hero | Alpharetta | Excavator on a cleared commercial site in Alpharetta, Georgia |
+| "Let's discuss your project" band (all pages) | Highway 75 Pump Station | Dark, subtle background: tree line above the pump station excavation |
+
+Every hero photo was checked so the white heading and text stay easy to read over the dark shading, on phones and on large screens.
+
+**Still using stock photos:**
+
+- **Markets — Residential.** None of the photos show residential work.
+- **Markets — Roadway.** The only two roadway photos (the Reliant Market District paving and the Alpharetta street trench) are already used twice.
+
+**Questions**
+
+1. Do you have photos of a residential job (subdivision streets, lots, utilities) and of road paving or DOT road work? They would replace the last two stock photos.
+2. Is Reliant Market District residential (townhomes) or commercial? Its paving photo is now the Roadways & Stormwater hero.
