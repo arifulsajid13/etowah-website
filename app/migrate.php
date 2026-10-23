@@ -6,7 +6,7 @@ declare(strict_types=1);
  * The current version is stored in settings.schema_version; fresh installs get it from the seed.
  */
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 /** Run any pending upgrades once. Called from bootstrap on every request (one cheap settings lookup). */
 function migrate_if_needed(): void
@@ -65,6 +65,10 @@ function run_migrations(PDO $pdo, int $from): void
                 $pdo->exec("ALTER TABLE jobs ADD COLUMN {$column} {$definition}");
             }
         }
+    }
+    if ($from < 5) {
+        // v5: separate list for job application emails. Empty = applications keep going to notify_emails.
+        $pdo->exec("INSERT IGNORE INTO settings (k, v) VALUES ('notify_emails_jobs', '')");
     }
     $stmt = $pdo->prepare("INSERT INTO settings (k, v) VALUES ('schema_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)");
     $stmt->execute([(string) SCHEMA_VERSION]);

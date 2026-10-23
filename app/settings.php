@@ -13,6 +13,7 @@ const SETTING_DEFAULTS = [
     'license_number'           => 'UC002776',
     'markets_line'             => 'Municipal • Commercial • Residential • Roadway',
     'notify_emails'            => 'ECG@etowahconstruction.com',
+    'notify_emails_jobs'       => '',   // empty = job applications go to notify_emails
     'google_site_verification' => '',
     'site_url'                 => '',   // empty = use site_url from app/config.php
     'hide_from_search'         => '1',  // new installs start hidden (demo); switch off at go-live
@@ -67,11 +68,17 @@ function search_hidden(): bool
     return setting('hide_from_search') === '1';
 }
 
-/** List of notification addresses from the comma-separated setting. */
-function notify_emails(): array
+/** List of notification addresses from a comma-separated setting (contact inquiries by default). */
+function notify_emails(string $key = 'notify_emails'): array
 {
-    $list = array_filter(array_map('trim', explode(',', setting('notify_emails'))), 'valid_email');
+    $list = array_filter(array_map('trim', explode(',', setting($key))), 'valid_email');
     return array_values(array_unique($list));
+}
+
+/** Addresses for job application emails; falls back to the contact inquiry list when none are set. */
+function notify_emails_jobs(): array
+{
+    return notify_emails('notify_emails_jobs') ?: notify_emails();
 }
 
 function page_meta(string $key): array

@@ -36,16 +36,19 @@ if (is_post()) {
             }
         }
     }
-    $emails = array_values(array_filter(array_map('trim', explode(',', post_str('notify_emails'))), 'strlen'));
-    $bad = array_filter($emails, fn($a) => !valid_email($a));
-    if (!$emails) {
-        $errors['notify_emails'] = 'Add at least one email address to receive notifications.';
-    } elseif ($bad) {
-        $errors['notify_emails'] = 'These addresses are not valid: ' . implode(', ', $bad);
-    } elseif (count($emails) > 10) {
-        $errors['notify_emails'] = 'Use 10 addresses or fewer.';
+    // Contact inquiries need at least one address; job applications may be empty (they then use the first list).
+    foreach (['notify_emails' => true, 'notify_emails_jobs' => false] as $key => $required) {
+        $emails = array_values(array_filter(array_map('trim', explode(',', post_str($key))), 'strlen'));
+        $bad = array_filter($emails, fn($a) => !valid_email($a));
+        if (!$emails && $required) {
+            $errors[$key] = 'Add at least one email address to receive notifications.';
+        } elseif ($bad) {
+            $errors[$key] = 'These addresses are not valid: ' . implode(', ', $bad);
+        } elseif (count($emails) > 10) {
+            $errors[$key] = 'Use 10 addresses or fewer.';
+        }
+        $new[$key] = implode(', ', array_unique($emails));
     }
-    $new['notify_emails'] = implode(', ', array_unique($emails));
 
     // Accept either the bare code or the whole <meta> tag Google shows.
     $verification = post_str('google_site_verification');
@@ -157,10 +160,16 @@ admin_start('Site Settings', 'settings');
               <section class="panel">
                 <div class="panel-head"><h2>Notifications</h2></div>
                 <div class="field<?= $cls('notify_emails') ?>">
-                  <label for="s-notify">Send new inquiries and applications to</label>
+                  <label for="s-notify">Send contact inquiries to</label>
                   <textarea id="s-notify" name="notify_emails" rows="3" required><?= e($values['notify_emails'] ?? '') ?></textarea>
                   <p class="hint">One or more email addresses, separated by commas.</p>
                   <?= $err('notify_emails') ?>
+                </div>
+                <div class="field<?= $cls('notify_emails_jobs') ?>">
+                  <label for="s-notify-jobs">Send job applications to <span class="optional">(optional)</span></label>
+                  <textarea id="s-notify-jobs" name="notify_emails_jobs" rows="3"><?= e($values['notify_emails_jobs'] ?? '') ?></textarea>
+                  <p class="hint">One or more email addresses, separated by commas. Leave empty to send applications to the contact inquiry addresses.</p>
+                  <?= $err('notify_emails_jobs') ?>
                 </div>
               </section>
               <section class="panel">

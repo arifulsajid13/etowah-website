@@ -365,3 +365,28 @@ Client request: show every project as finished work, with no "Current", "Complet
 **Packages:** etowah-update.zip (70 files, no install/, no app/config.php) and etowah-hostinger.zip (105 files) rebuilt.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+
+## Separate notification email for job applications — 2026-10-23
+
+**Commit:** "Separate notification email for job applications"
+
+**Request:** Client wanted job application emails to go to different people than contact form inquiries.
+
+**Changes:**
+- Site Settings → Notifications: the existing field is now labelled "Send contact inquiries to" (still required). A new optional field below it, "Send job applications to", takes one or more comma-separated addresses with the same checks as the first field: every address must be valid, 10 at most, and duplicates are removed. The design is unchanged: one more field in the same panel, using the existing field, hint and "(optional)" styles.
+- New setting `notify_emails_jobs` (`app/settings.php`), empty by default. `notify_emails_jobs()` returns that list, or the contact inquiry list when it is empty.
+- `submit-contact.php` still sends to `notify_emails()`. `submit-application.php` now sends to `notify_emails_jobs()`.
+- Migration v5 (`app/migrate.php`, `SCHEMA_VERSION` 4 → 5): `INSERT IGNORE` of `notify_emails_jobs` = '' for existing sites. Nothing changes until the field is filled in, and it is safe to repeat. New installs get the setting from `SETTING_DEFAULTS` through the seed.
+
+**Checked:** Local site (mail transport `log`, i.e. storage/logs/mail.log) with a temporary admin user. The test inquiries, applications, resume files, activity rows, rate-limit rows, the user and the mail.log lines were removed afterwards, and local settings were restored.
+- Migration: the first page request upgraded the local DB from v4 to v5 and added `notify_emails_jobs` = ''. When rolled back to v4 with a value already set, the re-run kept that value.
+- Job list empty: a contact message and a general application both went to the contact list (fallback).
+- Lists set in Site Settings (contact: two addresses, jobs: two addresses plus a duplicate): the contact message went only to the contact list, and the application only to the jobs list, with the duplicate dropped.
+- Job list cleared again: the application went back to the contact list.
+- Validation: an invalid address in the jobs field, an empty contact field, and 11 job addresses each show the right error under the right field, and nothing is saved.
+- `php -l` passes on every changed PHP file.
+
+**Packages:** etowah-update.zip (70 files, no install/, no app/config.php) and etowah-hostinger.zip (105 files) rebuilt.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

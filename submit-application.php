@@ -124,7 +124,7 @@ $body = "A new job application was sent from the website.\n\n"
     . "Message:\n" . ($message !== '' ? $message : '(none)') . "\n\n"
     . "The resume is stored securely in the dashboard (it is not attached to this email).\n"
     . 'View the application: ' . site_url('/admin/?p=application&id=' . $id) . "\n";
-mail_send(notify_emails(), 'New job application — ' . mail_header_safe($name) . ' (' . mail_header_safe($position) . ')', $body, $email, mail_header_safe($name));
+mail_send(notify_emails_jobs(), 'New job application — ' . mail_header_safe($name) . ' (' . mail_header_safe($position) . ')', $body, $email, mail_header_safe($name));
 
 $respond(true, ['message' => 'Thank you — your application has been received.']);
 
