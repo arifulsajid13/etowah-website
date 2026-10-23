@@ -1010,3 +1010,11 @@ strong { color: var(--text); font-weight: 600; }
 .steps li + li,
 .plain-list li + li { margin-top: 8px; }
 .steps code { word-break: break-all; }
+.diagnostics { margin-top: 24px; }
+.diagnostics > summary { cursor: pointer; }
+.diag-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 16px 0; }
+.diag-list dt { color: var(--muted); }
+.diag-list dd { margin: 0; word-break: break-word; }
+.diagnostics code { word-break: break-all; }
+.diag-files { font-size: 0.875rem; }
+@media (max-width: 639.98px) { .diag-list { grid-template-columns: 1fr; } .diag-list dd { margin-bottom: 8px; } }

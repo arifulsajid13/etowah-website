@@ -154,6 +154,14 @@ When your developer sends you **etowah-projects-import.zip** (projects with thei
 4. Reload **Import projects**. Check the preview (new projects, updated projects, number of photos and videos), then press **Import**.
 5. The package files are deleted from the folder automatically after a successful import.
 
+If the page says **No import package found**, open the **Diagnostics** box at the bottom of the page. It lists:
+- every folder the importer checks (the one in use, plus `etowah-storage/import` and `public_html/storage/import`),
+- whether each folder exists and can be read,
+- the files PHP sees in each one,
+- whether zip support is on.
+
+A package extracted into its own subfolder is also found. If several zips are in the folder, the newest `etowah-projects-import*.zip` is used.
+
 The import never overwrites text you edited in the dashboard, a real main photo or page photo you uploaded, or a homepage choice you changed. Running it twice adds nothing twice. A newer package (for example with touched-up photos) swaps the photos it imported before, in place.
 
 Need help? Tell your developer what you see on the screen. The dashboard's **Site Settings → System** box shows the server's health and the most recent errors.

@@ -584,3 +584,57 @@ Client request: show every project as finished work, with no "Current", "Complet
 - `etowah-projects-import.zip`: 83.0 MB, rebuilt for the text changes; photos unchanged.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+
+## Import diagnostics and fixes — 2026-10-24
+
+**Commit:** "Import diagnostics and fixes"
+
+**Problem:** On the live site, Admin → Import projects said "No import package found", although the zip was in `…/snow-locust-324560.hostingersite.com/etowah-storage/import/`. Extracting it there did not help either.
+
+**How the importer looked for a package (before):**
+- **Folder:** only one, `storage_path('import')`. That is the absolute `storage_path` written into `app/config.php` at install time plus `/import`. The installer picks `<parent of public_html>/etowah-storage` when PHP can write the parent folder, and `public_html/storage` otherwise.
+- **Lookup:** `projects.json` directly in that folder; otherwise `glob('*.zip')`, which had to find exactly one zip, unpacked with ZipArchive.
+- **Cache:** none. Admin pages already sent `Cache-Control: no-store` (PHP's session start sends it too).
+
+**Causes found (each one ends in "No import package found" with no error):**
+1. **Single folder.** If config.php points somewhere else (installer fallback to `public_html/storage`, or a domain folder renamed after install), a package in `etowah-storage/import` is never seen.
+2. **Exactly one zip required.** A second copy such as "etowah-projects-import (1).zip", or any other zip in the folder, made it silently ignore all of them.
+3. **Extraction subfolder.** File Manager's Extract usually creates `import/etowah-projects-import/`, and `projects.json` one level down was not checked.
+4. **`glob()`.** It is case-sensitive (`.ZIP` was missed), treats `[` `]` as patterns, and returns nothing in some open_basedir setups.
+5. **Cleanup:** it deleted every `*.zip` in the folder, not just the package.
+
+**Fixes (`admin/inc/import.php`, `admin/inc/views/import.php`, `app/helpers.php`):**
+- **Folders:** `import_dirs()` searches the configured import folder, then `<parent>/etowah-storage/import`, then `public_html/storage/import`.
+- **Locating (`import_locate()`):** in each folder, `projects.json`, then one subfolder down, then a zip.
+  - Files are listed with `scandir` (no glob), and `.zip` is matched in any case.
+  - With several zips, the newest `etowah-projects-import*.zip` wins.
+  - A broken zip, or a zip without `projects.json`, now shows a clear error.
+- **Cleanup (`import_clear()`):** deletes only `projects.json`, the package's own hash-named media files, the package zip (only `etowah-projects-import*.zip`, never an unrelated zip) and an empty extraction subfolder.
+- **`storage_path()`:** if the configured folder does not exist, it falls back to `<parent>/etowah-storage`, then `public_html/storage`. This keeps resumes, logs, sessions and imports working after a domain folder rename.
+- **Diagnostics box on the Import page:**
+  - The box shows:
+    - where the package was found;
+    - the storage folder in use and the one in config.php (flagged "does not exist");
+    - ZipArchive availability;
+    - the PHP user;
+    - open_basedir;
+    - for each searched folder: exists, readable, writable, inside open_basedir, real path, and the files PHP sees, with sizes.
+  - It is open when no package is found or there are problems, and collapsed otherwise.
+- **Headers:** admin pages also send `Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private`, `Pragma: no-cache` and `X-LiteSpeed-Cache-Control: no-cache`. They are set in `send_security_headers(true)`; the duplicate line in `admin/inc/init.php` was removed.
+- **DEPLOY.md** step 11 mentions the diagnostics.
+
+**Checked locally** (`etowah_import_test`, which already held the import, so the previews said "Already imported"; temporary admin removed and config restored afterwards):
+- **Headers:** `Cache-Control: no-store, no-cache, must-revalidate`, `Pragma: no-cache`, `X-LiteSpeed-Cache-Control: no-cache`.
+- **Folders and zips:**
+  - Zip only in `etowah-storage/import` while config points to `storage/`: found, and Finish removed it.
+  - Extracted into a subfolder, with and without the zip kept: found, and the subfolder and zip were removed.
+  - Two copies plus an unrelated `OTHER.ZIP`: the newest copy was used, and the next visit found the other. `OTHER.ZIP` was never touched.
+  - Uppercase `.ZIP`: found.
+  - Truncated zip: "could not be opened … upload it again".
+  - Nothing anywhere: "No import package found" with the diagnostics open.
+- **Missing storage folder:** with config.php's `storage_path` set to a missing folder, the site and login keep working on `etowah-storage`, and the diagnostics show "(does not exist)".
+- **Layout:** the diagnostics box was checked at 1440 and 375px, with no overflow and no JS errors.
+- `php -l` passes on the changed files.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

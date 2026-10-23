@@ -82,9 +82,24 @@ function media_url(string $path): string
     return '/' . ltrim($path, '/');
 }
 
+/**
+ * Private storage folder (resumes, logs, sessions, imports). config.php stores an absolute path chosen at install time;
+ * if that folder no longer exists (domain folder renamed, site moved), use the standard locations instead.
+ */
 function storage_path(string $sub = ''): string
 {
-    $base = rtrim((string) config('storage_path', ROOT . '/storage'), '/\\');
+    static $base = null;
+    if ($base === null) {
+        $base = rtrim((string) config('storage_path', ROOT . '/storage'), '/\\');
+        if (!@is_dir($base)) {
+            foreach ([rtrim(dirname(ROOT), '/\\') . '/etowah-storage', ROOT . '/storage'] as $fallback) {
+                if (@is_dir($fallback)) {
+                    $base = $fallback;
+                    break;
+                }
+            }
+        }
+    }
     return $sub === '' ? $base : $base . '/' . ltrim($sub, '/');
 }
 
@@ -238,6 +253,10 @@ function send_security_headers(bool $admin): void
         header('Strict-Transport-Security: max-age=31536000');
     }
     if ($admin) {
+        // Dashboard pages are private and change on every request: no browser, LiteSpeed, or CDN cache may keep them.
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
+        header('Pragma: no-cache');
+        header('X-LiteSpeed-Cache-Control: no-cache');
         header('X-Frame-Options: DENY');
         header('X-Robots-Tag: noindex, nofollow');
         header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'");

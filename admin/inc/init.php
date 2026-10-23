@@ -10,5 +10,4 @@ require APP . '/auth.php';
 require __DIR__ . '/helpers.php';
 require __DIR__ . '/layout.php';
 
-send_security_headers(true);
-header('Cache-Control: no-store, max-age=0');
+send_security_headers(true); // includes Cache-Control: no-store
