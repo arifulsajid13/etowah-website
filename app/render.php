@@ -99,6 +99,11 @@ function job_posting_jsonld(array $job): array
         ],
         'employmentType'     => $types[$job['employment_type']] ?? null,
     ];
+    // Entry level and "not specified" have no minimum, so experienceRequirements is left out.
+    $months = EXPERIENCE_RANGES[$job['experience_range'] ?? ''][2] ?? null;
+    if ($months !== null) {
+        $data['experienceRequirements'] = ['@type' => 'OccupationalExperienceRequirements', 'monthsOfExperience' => $months];
+    }
     if (trim((string) $job['location']) !== '') {
         [$city, $region] = array_pad(array_map('trim', explode(',', $job['location'], 2)), 2, '');
         $data['jobLocation'] = [

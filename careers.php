@@ -32,7 +32,7 @@ if ($job):
         <div class="hero-inner">
           <nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/careers">Careers</a></li><li aria-current="page"><?= e($job['title']) ?></li></ol></nav>
           <h1><?= e($job['title']) ?></h1>
-<?php if (($meta = job_meta_line($job)) !== ''): ?>
+<?php if (($meta = job_meta_line($job, true)) !== ''): ?>
           <p class="hero-sub"><?= e($meta) ?></p>
 <?php endif; ?>
         </div>

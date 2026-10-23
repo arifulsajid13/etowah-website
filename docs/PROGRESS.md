@@ -336,3 +336,32 @@ Client request: show every project as finished work, with no "Current", "Complet
 **Packages:** etowah-update.zip (70 files, no install/, no app/config.php) and etowah-hostinger.zip (105 files) rebuilt. No code file in either zip contains the old contact values.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+
+## Jobs: experience field — 2026-10-23
+
+**Commit:** "Jobs: experience field"
+
+**Request:** Client wanted an optional "Experience" field on jobs, shown on the Careers page, the job page and in Google's job data.
+
+**Changes:**
+- Database: two nullable columns on `jobs`, `experience_range` (`entry`, `0-1`, `1-2`, `2-4`, `3-5`, `5+`, `10+`) and `experience_level` (`preferred`, `required`). NULL means "Not specified". `app/schema.sql` has them for new installs.
+- Migration v4 (`app/migrate.php`, `SCHEMA_VERSION` 3 → 4): adds each column only if it is missing, so it runs once on the first request after upload and is safe to repeat. Existing jobs become "Not specified" and look the same as before.
+- `app/helpers.php`: `EXPERIENCE_RANGES` (admin label, public label, minimum months) and `EXPERIENCE_LEVELS`.
+- Add/Edit job: "Experience" (default Not specified) and "Requirement" (default Preferred) dropdowns in the row under Location / Employment type. Requirement is hidden and disabled for "Not specified" and "Entry level / no experience" (`initExperience()` in `admin/assets/admin.js`). The server ignores the posted level for those two options and stores NULL.
+- Careers cards: the range is added to the meta line, e.g. "CARTERSVILLE, GEORGIA • FULL-TIME • 2–4 YEARS" (`job_meta_line()` / `job_experience_label()` in `app/content.php`).
+- Job page: the hero meta line adds "EXPERIENCE: 2–4 YEARS PREFERRED" (or REQUIRED). Entry level shows "EXPERIENCE: ENTRY LEVEL" with no Preferred/Required.
+- JobPosting JSON-LD (`app/render.php`): `experienceRequirements` = `OccupationalExperienceRequirements` with `monthsOfExperience` from the lower bound (0, 12, 24, 36, 60, 120). Left out for "Not specified" and "Entry level".
+- Admin Jobs list: the range is added under the title, after location and employment type.
+
+**Decision:** The 0–1 Years option gives `monthsOfExperience: 0`, as the lower bound is 0.
+
+**Checked:** Local site with a temporary admin user; the test jobs and the user were removed afterwards.
+- Migration: local DB rolled back to v3 with an existing open job, then one page request upgraded it to v4. The job kept NULL experience and its card was unchanged.
+- One job created per option (Not specified, Entry level, and each range with Preferred or Required), then one job edited 2–4 Preferred → 10+ Required → Not specified → Entry level. Each time: the form reloads with the saved values, Requirement shows or hides correctly, the stored level is NULL where it should be, and the card meta, job page meta and JSON-LD match the list above.
+- Admin job form, Jobs list, Careers and a job page at 375 and 1440px: no horizontal scroll, no console errors.
+- `php -l` passes on every changed PHP file.
+
+**Packages:** etowah-update.zip (70 files, no install/, no app/config.php) and etowah-hostinger.zip (105 files) rebuilt.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

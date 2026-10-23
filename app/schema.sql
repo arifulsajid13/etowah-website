@@ -105,6 +105,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   slug VARCHAR(120) NOT NULL,
   location VARCHAR(120) NOT NULL DEFAULT '',
   employment_type VARCHAR(40) NOT NULL DEFAULT '',
+  experience_range VARCHAR(10) NULL,
+  experience_level VARCHAR(10) NULL,
   description TEXT NULL,
   status ENUM('draft','open','closed') NOT NULL DEFAULT 'draft',
   posted_at DATETIME NULL,

@@ -108,8 +108,22 @@ function job_open_by_slug(string $slug): ?array
     return db_one("SELECT * FROM jobs WHERE status = 'open' AND slug = ?", [$slug]);
 }
 
-/** "LOCATION • EMPLOYMENT TYPE" line for a job, skipping empty parts. */
-function job_meta_line(array $job): string
+/** "LOCATION • EMPLOYMENT TYPE • 2–4 YEARS" line for a job, skipping empty parts. $full gives "EXPERIENCE: 2–4 YEARS PREFERRED". */
+function job_meta_line(array $job, bool $full = false): string
 {
-    return upper(implode(' • ', array_filter([$job['location'], $job['employment_type']], 'strlen')));
+    return upper(implode(' • ', array_filter([$job['location'], $job['employment_type'], job_experience_label($job, $full)], 'strlen')));
+}
+
+/** "2–4 Years", or with $full "Experience: 2–4 Years Preferred". Empty when not specified. */
+function job_experience_label(array $job, bool $full = false): string
+{
+    $range = EXPERIENCE_RANGES[$job['experience_range'] ?? ''] ?? null;
+    if (!$range) {
+        return '';
+    }
+    if (!$full) {
+        return $range[1];
+    }
+    $level = $range[2] !== null ? (EXPERIENCE_LEVELS[$job['experience_level'] ?? ''] ?? 'Preferred') : '';
+    return trim('Experience: ' . $range[1] . ' ' . $level);
 }

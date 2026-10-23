@@ -6,7 +6,7 @@ declare(strict_types=1);
  * The current version is stored in settings.schema_version; fresh installs get it from the seed.
  */
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 
 /** Run any pending upgrades once. Called from bootstrap on every request (one cheap settings lookup). */
 function migrate_if_needed(): void
@@ -57,6 +57,14 @@ function run_migrations(PDO $pdo, int $from): void
         ]);
         $pdo->prepare("UPDATE projects SET description = CONCAT('Completed', SUBSTRING(description, 11)) WHERE slug = ? AND description LIKE 'Completing all site work scopes,%'")
             ->execute(['alpharetta-commercial']);
+    }
+    if ($from < 4) {
+        // v4: optional experience on jobs. Existing jobs stay "not specified" (NULL).
+        foreach (['experience_range' => 'VARCHAR(10) NULL AFTER employment_type', 'experience_level' => 'VARCHAR(10) NULL AFTER experience_range'] as $column => $definition) {
+            if (!db_column_exists($pdo, 'jobs', $column)) {
+                $pdo->exec("ALTER TABLE jobs ADD COLUMN {$column} {$definition}");
+            }
+        }
     }
     $stmt = $pdo->prepare("INSERT INTO settings (k, v) VALUES ('schema_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)");
     $stmt->execute([(string) SCHEMA_VERSION]);

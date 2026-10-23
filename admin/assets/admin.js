@@ -11,6 +11,7 @@
     initCounters();
     initSlugs();
     initServiceToggles();
+    initExperience();
     initHomePosition();
     initSeoPreview();
     initProjectSerp();
@@ -195,6 +196,22 @@
       if (!panel) return;
       box.addEventListener("change", function () { panel.hidden = !box.checked; });
     });
+  }
+
+  /* Job form: Requirement only applies to an experience range in years -------- */
+  function initExperience() {
+    var range = document.querySelector("[data-experience]");
+    var field = document.querySelector("[data-experience-level]");
+    if (!range || !field) return;
+    var level = field.querySelector("select");
+    function update() {
+      var option = range.options[range.selectedIndex];
+      var off = !range.value || option.hasAttribute("data-no-level");
+      field.hidden = off;
+      level.disabled = off;
+    }
+    range.addEventListener("change", update);
+    update();
   }
 
   /* Project form: homepage spot already taken -------------------------------- */

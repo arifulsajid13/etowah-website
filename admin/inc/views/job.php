@@ -28,9 +28,15 @@ if (is_post()) {
         'slug'            => post_str('slug'),
         'location'        => post_str('location'),
         'employment_type' => in_array(post_str('employment_type'), EMPLOYMENT_TYPES, true) ? post_str('employment_type') : '',
+        'experience_range' => array_key_exists(post_str('experience_range'), EXPERIENCE_RANGES) ? post_str('experience_range') : null,
+        'experience_level' => null,
         'description'     => post_str('description'),
         'status'          => pick(post_str('status'), JOB_STATUSES, 'draft'),
     ];
+    // Preferred/Required only applies to a range in years.
+    if ($in['experience_range'] !== null && EXPERIENCE_RANGES[$in['experience_range']][2] !== null) {
+        $in['experience_level'] = pick(post_str('experience_level'), EXPERIENCE_LEVELS, 'preferred');
+    }
     if ($in['title'] === '' || str_length($in['title']) > 200) {
         $errors['title'] = 'Enter a job title (up to 200 characters).';
     }
@@ -50,11 +56,11 @@ if (is_post()) {
         if ($in['status'] === 'open' && !$postedAt) {
             $postedAt = now();
         }
-        $params = [$in['title'], $slug, $in['location'], $in['employment_type'], $in['description'], $in['status'], $postedAt];
+        $params = [$in['title'], $slug, $in['location'], $in['employment_type'], $in['experience_range'], $in['experience_level'], $in['description'], $in['status'], $postedAt];
         if ($job) {
-            db_run('UPDATE jobs SET title = ?, slug = ?, location = ?, employment_type = ?, description = ?, status = ?, posted_at = ? WHERE id = ?', array_merge($params, [$id]));
+            db_run('UPDATE jobs SET title = ?, slug = ?, location = ?, employment_type = ?, experience_range = ?, experience_level = ?, description = ?, status = ?, posted_at = ? WHERE id = ?', array_merge($params, [$id]));
         } else {
-            db_run('INSERT INTO jobs (title, slug, location, employment_type, description, status, posted_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())', $params);
+            db_run('INSERT INTO jobs (title, slug, location, employment_type, experience_range, experience_level, description, status, posted_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())', $params);
             $id = (int) db()->lastInsertId();
         }
         log_activity(($job ? 'Updated' : 'Added') . ' job ' . mb_substr($in['title'], 0, 40) . ' (' . JOB_STATUSES[$in['status']] . ')', 'job', $id);
@@ -64,8 +70,10 @@ if (is_post()) {
     $job = array_merge($job ?? ['id' => 0, 'posted_at' => null], $in);
 }
 
-$j = $job ?? ['id' => 0, 'title' => '', 'slug' => '', 'location' => 'Cartersville, GA', 'employment_type' => 'Full-time', 'description' => '', 'status' => 'draft', 'posted_at' => null];
+$j = $job ?? ['id' => 0, 'title' => '', 'slug' => '', 'location' => 'Cartersville, GA', 'employment_type' => 'Full-time', 'experience_range' => null, 'experience_level' => null, 'description' => '', 'status' => 'draft', 'posted_at' => null];
 $isNew = empty($j['id']);
+$expRange = $j['experience_range'] ?? null;
+$expHasLevel = $expRange !== null && isset(EXPERIENCE_RANGES[$expRange]) && EXPERIENCE_RANGES[$expRange][2] !== null;
 $err = fn(string $k) => isset($errors[$k]) ? '<p class="field-error">' . e($errors[$k]) . '</p>' : '';
 
 admin_start($isNew ? 'Add job' : 'Edit job', 'jobs');
@@ -104,6 +112,23 @@ admin_start($isNew ? 'Add job' : 'Edit job', 'jobs');
                   <select id="j-type" name="employment_type">
 <?php foreach (EMPLOYMENT_TYPES as $type): ?>
                     <option<?= sel($j['employment_type'] === $type) ?>><?= e($type) ?></option>
+<?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="j-experience">Experience</label>
+                  <select id="j-experience" name="experience_range" data-experience>
+                    <option value="">Not specified</option>
+<?php foreach (EXPERIENCE_RANGES as $key => [$label, , $months]): ?>
+                    <option value="<?= e($key) ?>"<?= $months === null ? ' data-no-level' : '' ?><?= sel($expRange === $key) ?>><?= e($label) ?></option>
+<?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="field" data-experience-level<?= $expHasLevel ? '' : ' hidden' ?>>
+                  <label for="j-experience-level">Requirement</label>
+                  <select id="j-experience-level" name="experience_level"<?= $expHasLevel ? '' : ' disabled' ?>>
+<?php foreach (EXPERIENCE_LEVELS as $key => $label): ?>
+                    <option value="<?= e($key) ?>"<?= sel(($j['experience_level'] ?? 'preferred') === $key) ?>><?= e($label) ?></option>
 <?php endforeach; ?>
                   </select>
                 </div>

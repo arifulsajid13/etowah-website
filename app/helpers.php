@@ -19,6 +19,20 @@ const MARKETS = [
 
 const EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Contract', 'Seasonal', 'Internship', 'Other'];
 
+/** Stored jobs.experience_range => [admin label, public label, minimum months or null]. NULL in the database means not specified. */
+const EXPERIENCE_RANGES = [
+    'entry' => ['Entry level / no experience', 'Entry level', null],
+    '0-1'   => ['0–1 Years', '0–1 Years', 0],
+    '1-2'   => ['1–2 Years', '1–2 Years', 12],
+    '2-4'   => ['2–4 Years', '2–4 Years', 24],
+    '3-5'   => ['3–5 Years', '3–5 Years', 36],
+    '5+'    => ['5+ Years', '5+ Years', 60],
+    '10+'   => ['10+ Years', '10+ Years', 120],
+];
+
+/** Stored jobs.experience_level; only used with a range in years. */
+const EXPERIENCE_LEVELS = ['preferred' => 'Preferred', 'required' => 'Required'];
+
 /** Escape for HTML text and attribute values. */
 function e(?string $value): string
 {

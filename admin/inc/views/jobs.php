@@ -18,7 +18,7 @@ admin_start('Jobs', 'jobs');
             <tbody>
 <?php foreach ($rows as $row): ?>
               <tr>
-                <td data-label="Job"><a class="row-link" href="<?= e(admin_url('job', ['id' => $row['id']])) ?>"><strong><?= e($row['title']) ?></strong></a><span class="cell-sub"><?= e(implode(' · ', array_filter([$row['location'], $row['employment_type']], 'strlen')) ?: '—') ?></span></td>
+                <td data-label="Job"><a class="row-link" href="<?= e(admin_url('job', ['id' => $row['id']])) ?>"><strong><?= e($row['title']) ?></strong></a><span class="cell-sub"><?= e(implode(' · ', array_filter([$row['location'], $row['employment_type'], job_experience_label($row)], 'strlen')) ?: '—') ?></span></td>
                 <td data-label="Status"><?= status_badge($row['status'], JOB_STATUSES) ?></td>
                 <td data-label="Posted"><?= e(fmt_date($row['posted_at'], false)) ?></td>
                 <td data-label="Applications"><a href="<?= e(admin_url('applications', ['job' => $row['id']])) ?>"><?= (int) $row['apps'] ?></a><?php if ($row['new_apps']): ?> <span class="badge badge--new"><?= (int) $row['new_apps'] ?> new</span><?php endif; ?></td>
