@@ -240,7 +240,7 @@ function send_security_headers(bool $admin): void
     if ($admin) {
         header('X-Frame-Options: DENY');
         header('X-Robots-Tag: noindex, nofollow');
-        header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'");
+        header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'");
     } else {
         header('X-Frame-Options: SAMEORIGIN');
     }

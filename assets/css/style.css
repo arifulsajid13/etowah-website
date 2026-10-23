@@ -1844,6 +1844,24 @@ a.job-card:hover .text-link .icon { transform: translateX(3px); }
 }
 .gallery-item:hover img { transform: scale(1.04); }
 .gallery-item:focus-visible { outline: 2px solid var(--steel-600); outline-offset: 3px; }
+.gallery-item--video { position: relative; cursor: pointer; }
+.gallery-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: rgba(17, 22, 27, .72);
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 50%;
+  color: var(--white);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.gallery-play .icon { width: 24px; height: 24px; margin-left: 3px; fill: currentColor; }
 
 .lightbox {
   width: 100vw;
@@ -1874,6 +1892,17 @@ a.job-card:hover .text-link .icon { transform: translateX(3px); }
   margin: 0 auto;
   border-radius: var(--radius);
 }
+.lightbox-video {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100vh - 160px);
+  margin: 0 auto;
+  background: #000;
+  border-radius: var(--radius);
+}
+.lightbox-video[hidden],
+.lightbox-figure picture[hidden] { display: none; }
 .lightbox-caption {
   margin-top: 14px;
   color: var(--on-dark);

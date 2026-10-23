@@ -10,3 +10,6 @@ uploads/*
 # Build output and private reference material
 dist/
 reference/
+
+# Original client photos and videos (never published or packaged)
+client-media/

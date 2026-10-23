@@ -67,10 +67,14 @@ function project_service_keys(int $projectId): array
     return array_values(array_intersect(array_keys(SERVICES), $keys));
 }
 
-/** Gallery images in the shape image_html() expects. */
+/** Gallery photos and videos in the shape image_html() expects (for a video, path is its poster image). */
 function project_gallery(int $projectId): array
 {
-    return db_all('SELECT id, path, alt, width, height FROM project_images WHERE project_id = ? ORDER BY sort_order, id', [$projectId]);
+    return db_all(
+        'SELECT id, media_type, path, video_path, title, upload_date, duration, alt, width, height, created_at
+           FROM project_images WHERE project_id = ? ORDER BY sort_order, id',
+        [$projectId]
+    );
 }
 
 /** Up to $limit other published projects in the same market. */

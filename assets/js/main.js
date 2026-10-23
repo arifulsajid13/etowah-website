@@ -28,23 +28,49 @@
     var source = box.querySelector("[data-lightbox-source]");
     var caption = box.querySelector("[data-lightbox-caption]");
     var count = box.querySelector("[data-lightbox-count]");
+    var video = box.querySelector("[data-lightbox-video]");
+    var picture = img.parentNode;
     var current = 0;
     var opener = null;
+
+    // Stop a playing video and drop its source, so nothing keeps downloading in the background.
+    function stopVideo() {
+      if (!video || !video.getAttribute("src")) return;
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    }
 
     function show(index) {
       current = (index + items.length) % items.length;
       var item = items[current];
-      var webp = item.getAttribute("data-webp");
-      if (webp) {
-        source.setAttribute("srcset", webp);
+      var clip = item.getAttribute("data-video");
+      stopVideo();
+      if (clip && video) {
+        // Videos: poster first, controls, no autoplay; the file loads only when the visitor presses play.
+        picture.hidden = true;
+        video.hidden = false;
+        video.poster = item.getAttribute("data-full");
+        video.width = parseInt(item.getAttribute("data-width"), 10) || 0;
+        video.height = parseInt(item.getAttribute("data-height"), 10) || 0;
+        video.setAttribute("aria-label", item.getAttribute("data-caption") || "");
+        video.src = clip;
+        caption.textContent = item.getAttribute("data-caption") || "";
       } else {
-        source.removeAttribute("srcset");
+        if (video) video.hidden = true;
+        picture.hidden = false;
+        var webp = item.getAttribute("data-webp");
+        if (webp) {
+          source.setAttribute("srcset", webp);
+        } else {
+          source.removeAttribute("srcset");
+        }
+        img.src = item.getAttribute("data-full");
+        img.alt = item.getAttribute("data-alt") || "";
+        img.width = parseInt(item.getAttribute("data-width"), 10) || 0;
+        img.height = parseInt(item.getAttribute("data-height"), 10) || 0;
+        caption.textContent = item.getAttribute("data-alt") || "";
       }
-      img.src = item.getAttribute("data-full");
-      img.alt = item.getAttribute("data-alt") || "";
-      img.width = parseInt(item.getAttribute("data-width"), 10) || 0;
-      img.height = parseInt(item.getAttribute("data-height"), 10) || 0;
-      caption.textContent = item.getAttribute("data-alt") || "";
       count.textContent = (current + 1) + " / " + items.length;
     }
 
@@ -64,6 +90,7 @@
     box.querySelector("[data-lightbox-next]").addEventListener("click", function () { show(current + 1); });
     box.querySelector("[data-lightbox-close]").addEventListener("click", function () { box.close(); });
     box.addEventListener("keydown", function (event) {
+      if (event.target === video) return; // arrow keys seek inside the video player
       if (event.key === "ArrowLeft" && !single) show(current - 1);
       if (event.key === "ArrowRight" && !single) show(current + 1);
     });
@@ -72,6 +99,7 @@
       if (event.target === box || event.target.classList.contains("lightbox-inner")) box.close();
     });
     box.addEventListener("close", function () {
+      if (!box.open) stopVideo(); // skip if the viewer was reopened before this event arrived
       if (opener) opener.focus();
     });
   }

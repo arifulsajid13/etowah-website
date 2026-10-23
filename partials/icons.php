@@ -18,6 +18,7 @@ function icon(string $name, string $class = 'icon'): string
         'pin'           => [24, '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'],
         'pin-card'      => [24, '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'],
         'check'         => [24, '<path d="M5 12.5l4.5 4.5L19 7.5"/>'],
+        'play'          => [24, '<path d="M8 5.5v13l10.5-6.5z"/>'],
         // 48 × 48 (homepage stats)
         'stat-license'  => [48, '<path d="M12 5h17l9 9v29H12z"/><path d="M29 5v9h9"/><path d="M18 22h14"/><path d="M18 28h14"/><path d="M18 34h9"/>'],
         'stat-road'     => [48, '<path d="M17 6L6 42"/><path d="M31 6l11 36"/><path d="M24 8v5"/><path d="M24 19v6"/><path d="M24 31v7"/>'],

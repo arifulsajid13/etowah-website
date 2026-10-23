@@ -1,4 +1,4 @@
-# Dashboard image uploads: serve images only, never run scripts.
+# Dashboard uploads: serve images and MP4 videos only, never run scripts.
 Options -Indexes -ExecCGI
 <IfModule mod_php.c>
   php_flag engine off
@@ -11,19 +11,19 @@ RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
 
 <IfModule mod_authz_core.c>
   Require all denied
-  <FilesMatch "\.(?i:jpe?g|png|webp)$">
+  <FilesMatch "\.(?i:jpe?g|png|webp|mp4)$">
     Require all granted
   </FilesMatch>
 </IfModule>
 <IfModule !mod_authz_core.c>
   Order deny,allow
   Deny from all
-  <FilesMatch "\.(?i:jpe?g|png|webp)$">
+  <FilesMatch "\.(?i:jpe?g|png|webp|mp4)$">
     Allow from all
   </FilesMatch>
 </IfModule>
 
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
-  Header set Content-Security-Policy "default-src 'none'; img-src 'self'; style-src 'none'; script-src 'none'"
+  Header set Content-Security-Policy "default-src 'none'; img-src 'self'; media-src 'self'; style-src 'none'; script-src 'none'"
 </IfModule>

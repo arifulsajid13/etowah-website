@@ -12,10 +12,12 @@ $update = ($argv[1] ?? '') === 'update';
 $out = $root . '/dist/' . ($update ? 'etowah-update.zip' : 'etowah-hostinger.zip');
 
 // Paths (relative, forward slashes) that never go into a package.
-$excludeDirs = ['.git', 'dist', 'docs', 'reference', 'tools', 'demo-static', '.claude', '.vscode', 'node_modules'];
+// client-media/ holds the client's original photos and videos: never published.
+$excludeDirs = ['.git', 'dist', 'docs', 'reference', 'tools', 'client-media', 'demo-static', '.claude', '.vscode', 'node_modules'];
 $excludeFiles = ['.gitignore', '.gitattributes', 'wrangler.jsonc', '.assetsignore', 'app/config.php', 'app/install.lock', 'storage/install-code.txt', 'storage/install-attempts.txt'];
 if ($update) {
-    array_push($excludeDirs, 'install', 'uploads', 'storage');
+    // uploads/ stays in: the rule below keeps only uploads/.htaccess, so its file-type rules reach the live site.
+    array_push($excludeDirs, 'install', 'storage');
 }
 $codeTypes = ['php', 'js', 'css', 'sql', 'htaccess'];
 

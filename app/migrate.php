@@ -6,7 +6,7 @@ declare(strict_types=1);
  * The current version is stored in settings.schema_version; fresh installs get it from the seed.
  */
 
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 
 /** Run any pending upgrades once. Called from bootstrap on every request (one cheap settings lookup). */
 function migrate_if_needed(): void
@@ -69,6 +69,21 @@ function run_migrations(PDO $pdo, int $from): void
     if ($from < 5) {
         // v5: separate list for job application emails. Empty = applications keep going to notify_emails.
         $pdo->exec("INSERT IGNORE INTO settings (k, v) VALUES ('notify_emails_jobs', '')");
+    }
+    if ($from < 6) {
+        // v6: videos in project galleries. Existing gallery rows become 'image'.
+        $columns = [
+            'media_type'  => "ENUM('image','video') NOT NULL DEFAULT 'image' AFTER project_id",
+            'video_path'  => 'VARCHAR(255) NULL AFTER path',
+            'title'       => 'VARCHAR(200) NULL AFTER video_path',
+            'upload_date' => 'DATE NULL AFTER title',
+            'duration'    => 'INT UNSIGNED NULL AFTER upload_date',
+        ];
+        foreach ($columns as $column => $definition) {
+            if (!db_column_exists($pdo, 'project_images', $column)) {
+                $pdo->exec("ALTER TABLE project_images ADD COLUMN {$column} {$definition}");
+            }
+        }
     }
     $stmt = $pdo->prepare("INSERT INTO settings (k, v) VALUES ('schema_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)");
     $stmt->execute([(string) SCHEMA_VERSION]);

@@ -39,7 +39,10 @@ admin_start('Projects', 'projects');
 ?>
         <div class="page-actions">
           <p class="lead">Projects appear on the Projects page, the matching service pages, the Markets page, and (if chosen) the homepage. The order here is the order on the website.</p>
-          <a class="btn btn--primary" href="<?= e(admin_url('project', ['id' => 'new'])) ?>">+ Add project</a>
+          <div class="button-row">
+            <a class="btn" href="<?= e(admin_url('import')) ?>">Import projects</a>
+            <a class="btn btn--primary" href="<?= e(admin_url('project', ['id' => 'new'])) ?>">+ Add project</a>
+          </div>
         </div>
 <?php if ($placeholderOnly): ?>
         <p class="notice notice--info">Showing only projects that still use a placeholder photo. <a href="<?= e(admin_url('projects')) ?>">Show all projects</a></p>

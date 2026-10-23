@@ -152,6 +152,7 @@ function like(string $term): string
 }
 
 const GALLERY_MAX = 12;
+const VIDEO_GALLERY_MAX = 3;
 // Projects that still need a main-photo description or a meta description.
 const PROJECT_SEO_MISSING = "(image_alt = '' OR seo_description IS NULL OR seo_description = '')";
 

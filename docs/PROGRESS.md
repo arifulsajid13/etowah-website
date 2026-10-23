@@ -390,3 +390,87 @@ Client request: show every project as finished work, with no "Current", "Complet
 **Packages:** etowah-update.zip (70 files, no install/, no app/config.php) and etowah-hostinger.zip (105 files) rebuilt.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+
+## Real project media, video gallery, project import — 2026-10-23
+
+**Commit:** "Real project media, video gallery, project import"
+
+**Request:** The client sent real photos and videos in six folders. Existing projects should be updated with them, new projects added, project galleries should support video, and everything should reach the live site through an import package. All existing projects stay.
+
+**Originals:** The six folders were moved from `assets/images/projects/` to `client-media/`. That folder is in `.gitignore` and excluded from every zip in `tools/build-package.php`. No original file is published or packaged.
+
+**Inspection (62 photos, 2 videos):**
+- There were no HEIC files. Most photos had their EXIF stripped (`logo_…` exports), so dates come from file names only.
+- GPS was used to confirm the place only, never published:
+  - Alpharetta: 4 photos → Alpharetta, Fulton County.
+  - Highway 75: 1 photo → near Cartersville, Bartow County.
+  - Twigs video → unincorporated Cobb County, near Powder Springs.
+  - Reliant Market District: none.
+- Every photo was reviewed on contact sheets, with a sharpness score and 100% crops of the soft ones. Vehicles and people were checked at publish size:
+  - No readable plates were found.
+  - One Alpharetta shot with a clearly visible face was dropped, as was the 3-second Twigs clip.
+  - Also dropped: blurry shots, near-duplicates, a finger over the lens, and a photo taken through glass.
+
+**Matching:**
+- **Alpharetta** → `alpharetta-commercial`.
+- **Tiftonia** → `chattanooga-rebuild`. The photos show deep, fully shored excavation in Tiftonia (Chattanooga); the location becomes "Tiftonia, Chattanooga, TN".
+- **Highway 75 Pump Station** → `bartow-pump-station`. The GPS is in Bartow County, and the photos show the station structure and piping.
+- **New projects:**
+  - `blue-ridge-pump-station`: Blue Ridge, GA, municipal, Pump Stations.
+  - `twigs-farmers-market`: location empty, commercial, Roadways & Stormwater + Site Development, with 1 video.
+  - `reliant-market-district`: location empty, commercial, Site Development + Roadways & Stormwater.
+- Existing titles, summaries, descriptions and facts are kept. One sentence about the photos is appended to each updated description, and missing SEO titles, meta descriptions and alt text are filled in. All text is in `tools/project-import/manifest.php`; the client review is in `docs/PROJECT-CONTENT-REVIEW.md`.
+
+**Media pipeline (`tools/build-project-import.php`):**
+- **Photos:** EXIF orientation is applied, then crops; output has no metadata (GD re-encode, checked by the build). JPG q80 + WebP q78, the same settings as the dashboard upload. Gallery photos are at most 1600px on the long side; main photos are 1920px wide. Width and height are recorded, and names are stable hashes.
+- **Video:** ffmpeg (installed with winget, Gyan.FFmpeg 9.0.2). H.264 High, at most 1080p (the source was 720p), CRF 23 capped at 2.5 Mbps (result 2.4 Mbps, 29 s, 8.5 MB). It uses faststart. Audio was removed (machine noise and possible crew talk). Metadata and data tracks were removed; the build fails if a location or creation tag survives. The poster is taken from the frame at 6 s.
+
+**Video support:**
+- Migration v6 (`SCHEMA_VERSION` 5 → 6) adds `media_type` (image|video, default image), `video_path`, `title`, `upload_date` and `duration` to `project_images`. Each column is added only if missing; `app/schema.sql` has them for new installs.
+- **Project page:** a video tile shows its poster with a play badge. The lightbox shows `<video controls preload="none" playsinline>` with a poster and no autoplay. The source is set only when that item opens, and it is paused and unloaded on next/previous or close. Arrow keys seek in the player instead of changing items.
+- **JSON-LD:** a VideoObject per video (`video_object_jsonld()`), with name, description, thumbnailUrl, contentUrl, uploadDate (the recorded date, or the day it was added) and duration.
+- **Admin gallery:**
+  - Videos appear with their poster, a "Video" badge, title, description, a "Watch video" link, up/down, and Remove (which deletes the poster, WebP and MP4).
+  - The count reads "N of 12 photos · N of 3 videos".
+  - Video upload accepts an MP4 only (checked by extension, finfo and `ftyp`) with an optional poster. When the poster is left empty, `admin.js` captures a frame in the browser. The admin CSP now allows `blob:` for media and images.
+  - The size limit shown is min(64 MB, the server's upload limits). An upload over `post_max_size` gets a clear message instead of a "session expired" page.
+- **Serving:** `uploads/.htaccess` allows `.mp4` (with `media-src 'self'`). The root `.htaccess` adds `AddType video/mp4` and a one-year cache. `etowah-update.zip` now includes `uploads/.htaccess`: the update build no longer skips the whole `uploads/` folder, and the runtime-folder rule still keeps only `.htaccess`.
+- **Sitemap:** each project URL lists `image:image` entries for its main photo (unless it is a placeholder) and its gallery photos.
+
+**Import (`admin/inc/import.php`, Admin → Projects → Import projects):**
+- **Package location:** `storage_path('import')`, which is `etowah-storage/import/` next to `public_html`, or `public_html/storage/import/` on sites whose storage fell back inside the web root. The page shows the exact path and creates the folder. Only the zip needs to be uploaded: it is unpacked in place, writing only `projects.json` and `media/<hash>.(jpg|webp|mp4)`.
+- **Preview:** new and updated projects, the photos and videos to add, fields filled versus kept, and homepage changes. **Import** asks for confirmation.
+- **Run:** media is copied into `uploads/`, then the database is written in one transaction. On failure it rolls back, removes newly copied files and keeps the package. After success, the package files are deleted.
+- **Safe to run twice:** projects match by slug and media by path; a second run shows "Already imported" and only deletes the package.
+- **Client edits are never overwritten:**
+  - A text field is filled only if it is empty or still holds the original seed text (both the "Completing" and the "Completed" Alpharetta variants count as original).
+  - A main photo is replaced only while it is a placeholder.
+  - Each homepage spot moves only while it holds its seeded project.
+  - The gallery limits of 12 photos and 3 videos are respected.
+- **Order:** new projects go right after a named project when there is room (Blue Ridge, Twigs and Reliant get 31–33 after Bartow's 30). That way the six projects with real photos lead the Projects page and the placeholder ones follow. On service pages, the new projects are appended at the end, so the existing cards stay.
+- **Homepage:** card1 = Alpharetta, card2 = Chattanooga rebuild (Tiftonia), banner = Bartow Water Pump Station (the shotcrete-wall photo suits the wide banner best).
+
+**Checked locally:** Portable MariaDB with a copy of the local data (`etowah_import_test`, kept for previewing) and a temporary admin user, which was removed afterwards. `app/config.php` was restored to `etowah_local`.
+- **Migration:** the copy was rolled back to v5 with a legacy gallery row; one request upgraded it to v6 and the row became `image`.
+- **Import:** the preview listed 3 new, 3 updated, 46 photos and 1 video, and the zip unpacked itself. The import gave the expected rows, files, sort orders, services and homepage spots, and the folder was emptied. The second run found nothing to add.
+- **Edit protection:** on a separate copy with a custom Bartow description, a real Chattanooga photo, a custom Alpharetta SEO title and card 1 changed, the preview kept all four.
+- **Pages:** Puppeteer with Chrome at 375 and 1440px covered Home, Projects, Markets, the 4 service pages, the 6 imported project pages and one unchanged project page. There were no console errors, failed requests or horizontal scroll. The only "broken image" reported was the lightbox's pre-existing empty placeholder `<img>`.
+- **Lightbox and video:** a photo opens, and the video opens with poster and controls and plays (1280×720, 29 s). Next/previous stops and unloads it, and no MP4 is requested before Play.
+- **Admin video:**
+  - The upload auto-captured a poster (1280×720), then reorder and delete worked; delete removes all 3 files.
+  - A 13 MB file (local limit 12 MB) and a 16 MB file (over `post_max_size`) both showed the size message.
+  - The admin gallery and Import pages were checked at 1440 and 375px.
+- **Sitemap:** valid XML with `image:image` entries; placeholder photos are excluded.
+- `php -l` passes on every changed PHP file.
+
+**Packages:**
+- `etowah-update.zip`: 73 files, 0.2 MB. No install/, no app/config.php, no client-media/.
+- `etowah-hostinger.zip`: 107 files, 6.0 MB.
+- `etowah-projects-import.zip`: 53.3 MB. It holds `projects.json` + 95 media files: 47 JPG + 47 WebP + 1 MP4, with the poster included.
+
+**Notes:** Photos at 1600px with the existing quality settings are heavy (median about 500 KB), because gravel and dirt textures compress poorly. A gallery of 12 lazy-loads about 6 MB. Smaller grid thumbnails (srcset) would be a good follow-up. The PHP dev server ignores Range requests; Apache and LiteSpeed on Hostinger support them.
+
+**Open questions:** see `docs/PROJECT-CONTENT-REVIEW.md`. The main ones are the Twigs and Reliant locations, and confirmation of the Tiftonia and Highway 75 matches.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

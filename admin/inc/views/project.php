@@ -14,14 +14,20 @@ if ($project) {
 }
 $errors = [];
 
+// A video larger than the server's post_max_size arrives as an empty POST (no form fields, no CSRF token).
+if (is_post() && $project && !$_POST && !$_FILES && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+    flash('error', 'That file is larger than ' . (int) floor(video_upload_limit() / 1048576) . ' MB, the most this server accepts. Compress the video to an H.264 MP4 (1080p or smaller), or add it with Import projects.');
+    redirect(admin_url('project', ['id' => $id]) . '#gallery');
+}
+
 if (is_post()) {
     require_post();
     $action = post_str('action');
 
     if ($action === 'delete' && $project) {
         image_delete_upload($project['image_path']);
-        foreach (db_all('SELECT path FROM project_images WHERE project_id = ?', [$id]) as $img) {
-            image_delete_upload($img['path']);
+        foreach (db_all('SELECT path, video_path FROM project_images WHERE project_id = ?', [$id]) as $row) {
+            gallery_delete_files($row);
         }
         db_run('DELETE FROM projects WHERE id = ?', [$id]);
         log_activity('Deleted project ' . mb_substr($project['title'], 0, 40), 'project', $id);
@@ -29,8 +35,37 @@ if (is_post()) {
         redirect(admin_url('projects'));
     }
 
+    if ($action === 'video_upload' && $project) {
+        $count = (int) db_value("SELECT COUNT(*) FROM project_images WHERE project_id = ? AND media_type = 'video'", [$id]);
+        $title = mb_substr(post_str('video_title'), 0, 200);
+        $description = mb_substr(post_str('video_alt'), 0, 255);
+        $video = null;
+        $poster = null;
+        try {
+            if ($count >= VIDEO_GALLERY_MAX) {
+                throw new RuntimeException('A gallery can hold ' . VIDEO_GALLERY_MAX . ' videos. Remove one first.');
+            }
+            $video = video_store_upload($_FILES['video'] ?? []);
+            if (($_FILES['video_poster']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+                throw new RuntimeException('Add a poster image for the video (a still photo shown before it plays).');
+            }
+            $poster = image_store_upload($_FILES['video_poster'], 'project-video', 1600);
+        } catch (RuntimeException $e) {
+            video_delete_upload($video);
+            flash('error', 'Video not added — ' . $e->getMessage());
+            redirect(admin_url('project', ['id' => $id]) . '#gallery');
+        }
+        $order = (int) db_value('SELECT COALESCE(MAX(sort_order), 0) + 10 FROM project_images WHERE project_id = ?', [$id]);
+        db_run('INSERT INTO project_images (project_id, media_type, path, video_path, title, upload_date, alt, width, height, sort_order, created_at)
+                VALUES (?, \'video\', ?, ?, ?, CURDATE(), ?, ?, ?, ?, NOW())',
+            [$id, $poster['path'], $video, $title !== '' ? $title : $project['title'], $description !== '' ? $description : $project['title'], $poster['width'], $poster['height'], $order]);
+        log_activity('Added a gallery video to ' . mb_substr($project['title'], 0, 30), 'project', $id);
+        flash('success', 'Video added to the gallery.');
+        redirect(admin_url('project', ['id' => $id]) . '#gallery');
+    }
+
     if ($action === 'gallery_upload' && $project) {
-        $count = (int) db_value('SELECT COUNT(*) FROM project_images WHERE project_id = ?', [$id]);
+        $count = (int) db_value("SELECT COUNT(*) FROM project_images WHERE project_id = ? AND media_type = 'image'", [$id]);
         $alt = mb_substr(post_str('gallery_alt'), 0, 255);
         $added = 0;
         $skipped = 0;
@@ -71,13 +106,18 @@ if (is_post()) {
             $alt = mb_substr(trim((string) $alt), 0, 255);
             $stmt->execute([$alt !== '' ? $alt : $project['title'], (int) $imgId, $id]);
         }
+        $stmt = db()->prepare("UPDATE project_images SET title = ? WHERE id = ? AND project_id = ? AND media_type = 'video'");
+        foreach ((array) ($_POST['gallery_titles'] ?? []) as $imgId => $title) {
+            $title = mb_substr(trim((string) $title), 0, 200);
+            $stmt->execute([$title !== '' ? $title : $project['title'], (int) $imgId, $id]);
+        }
         [$op, $imgId] = array_pad(explode(':', post_str('gallery_op'), 2), 2, '0');
         $imgId = (int) $imgId;
         $message = 'Gallery saved.';
-        if ($op === 'delete' && ($img = db_one('SELECT id, path FROM project_images WHERE id = ? AND project_id = ?', [$imgId, $id]))) {
-            image_delete_upload($img['path']);
+        if ($op === 'delete' && ($img = db_one('SELECT id, media_type, path, video_path FROM project_images WHERE id = ? AND project_id = ?', [$imgId, $id]))) {
+            gallery_delete_files($img);
             db_run('DELETE FROM project_images WHERE id = ?', [$img['id']]);
-            $message = 'Photo removed from the gallery.';
+            $message = $img['media_type'] === 'video' ? 'Video removed from the gallery.' : 'Photo removed from the gallery.';
         } elseif ($op === 'up' || $op === 'down') {
             $ids = array_map('intval', array_column(db_all('SELECT id FROM project_images WHERE project_id = ? ORDER BY sort_order, id', [$id]), 'id'));
             $pos = array_search($imgId, $ids, true);
@@ -221,6 +261,8 @@ $p = $project ?? [
 ];
 $isNew = empty($p['id']);
 $gallery = $isNew ? [] : db_all('SELECT * FROM project_images WHERE project_id = ? ORDER BY sort_order, id', [$p['id']]);
+$videoCount = count(array_filter($gallery, fn($m) => $m['media_type'] === 'video'));
+$photoCount = count($gallery) - $videoCount;
 $homeUsed = [];
 foreach (db_all("SELECT id, title, home_position FROM projects WHERE home_position <> 'none'") as $row) {
     if ((int) $row['id'] !== (int) $p['id']) {
@@ -411,37 +453,82 @@ admin_start($isNew ? 'Add project' : 'Edit project', 'projects');
         <section class="panel" id="gallery">
           <div class="panel-head">
             <h2>Gallery</h2>
-            <span class="hint"><?= count($gallery) ?> of <?= GALLERY_MAX ?> photos</span>
+            <span class="hint"><?= $photoCount ?> of <?= GALLERY_MAX ?> photos · <?= $videoCount ?> of <?= VIDEO_GALLERY_MAX ?> videos</span>
           </div>
 <?php if ($isNew): ?>
-          <p class="hint">Save the project first, then add gallery photos here.</p>
+          <p class="hint">Save the project first, then add gallery photos and videos here.</p>
 <?php else: ?>
-          <p class="hint">Optional extra photos shown on the project’s own page, with a full-screen viewer. Photos are resized and saved as WebP + JPG automatically.</p>
+          <p class="hint">Optional extra photos and videos shown on the project’s own page, with a full-screen viewer. Photos are resized and saved as WebP + JPG automatically. Videos play only when a visitor presses play.</p>
 <?php if ($gallery): ?>
           <form method="post" class="gallery-admin">
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="gallery_save">
             <button class="visually-hidden" type="submit" tabindex="-1" aria-hidden="true">Save descriptions</button>
             <ul class="gallery-list">
-<?php foreach ($gallery as $i => $img): ?>
-              <li class="gallery-row">
-                <img class="thumb" src="<?= e(media_url($img['path'])) ?>" alt="" width="96" height="64" loading="lazy">
-                <div class="field">
-                  <label for="ga-<?= (int) $img['id'] ?>">Description of photo <?= $i + 1 ?></label>
-                  <input id="ga-<?= (int) $img['id'] ?>" name="gallery_alts[<?= (int) $img['id'] ?>]" type="text" maxlength="255" value="<?= e($img['alt']) ?>">
+<?php foreach ($gallery as $i => $img): $isVideo = $img['media_type'] === 'video'; $kind = $isVideo ? 'video' : 'photo'; ?>
+              <li class="gallery-row<?= $isVideo ? ' gallery-row--video' : '' ?>">
+                <div class="thumb-wrap">
+                  <img class="thumb" src="<?= e(media_url($img['path'])) ?>" alt="" width="96" height="64" loading="lazy">
+<?php if ($isVideo): ?>
+                  <span class="badge">Video</span>
+<?php endif; ?>
+                </div>
+                <div class="stack">
+<?php if ($isVideo): ?>
+                  <div class="field">
+                    <label for="gt-<?= (int) $img['id'] ?>">Title of video <?= $i + 1 ?></label>
+                    <input id="gt-<?= (int) $img['id'] ?>" name="gallery_titles[<?= (int) $img['id'] ?>]" type="text" maxlength="200" value="<?= e((string) $img['title']) ?>">
+                  </div>
+<?php endif; ?>
+                  <div class="field">
+                    <label for="ga-<?= (int) $img['id'] ?>">Description of <?= $kind ?> <?= $i + 1 ?></label>
+                    <input id="ga-<?= (int) $img['id'] ?>" name="gallery_alts[<?= (int) $img['id'] ?>]" type="text" maxlength="255" value="<?= e($img['alt']) ?>">
+                  </div>
+<?php if ($isVideo): ?>
+                  <a class="panel-link" href="<?= e(media_url((string) $img['video_path'])) ?>" target="_blank" rel="noopener">Watch video <?= admin_icon('external') ?></a>
+<?php endif; ?>
                 </div>
                 <div class="order-btns">
-                  <button class="icon-btn icon-btn--sm" type="submit" name="gallery_op" value="up:<?= (int) $img['id'] ?>" aria-label="Move photo <?= $i + 1 ?> up"<?= $i === 0 ? ' disabled' : '' ?>><?= admin_icon('up') ?></button>
-                  <button class="icon-btn icon-btn--sm" type="submit" name="gallery_op" value="down:<?= (int) $img['id'] ?>" aria-label="Move photo <?= $i + 1 ?> down"<?= $i === count($gallery) - 1 ? ' disabled' : '' ?>><?= admin_icon('down') ?></button>
-                  <button class="btn btn--danger btn--sm" type="submit" name="gallery_op" value="delete:<?= (int) $img['id'] ?>" data-confirm="Remove photo <?= $i + 1 ?> from the gallery? The file is deleted.">Remove</button>
+                  <button class="icon-btn icon-btn--sm" type="submit" name="gallery_op" value="up:<?= (int) $img['id'] ?>" aria-label="Move <?= $kind ?> <?= $i + 1 ?> up"<?= $i === 0 ? ' disabled' : '' ?>><?= admin_icon('up') ?></button>
+                  <button class="icon-btn icon-btn--sm" type="submit" name="gallery_op" value="down:<?= (int) $img['id'] ?>" aria-label="Move <?= $kind ?> <?= $i + 1 ?> down"<?= $i === count($gallery) - 1 ? ' disabled' : '' ?>><?= admin_icon('down') ?></button>
+                  <button class="btn btn--danger btn--sm" type="submit" name="gallery_op" value="delete:<?= (int) $img['id'] ?>" data-confirm="Remove <?= $kind ?> <?= $i + 1 ?> from the gallery? The file is deleted.">Remove</button>
                 </div>
               </li>
 <?php endforeach; ?>
             </ul>
-            <button class="btn btn--primary btn--sm" type="submit">Save descriptions</button>
+            <button class="btn btn--primary btn--sm" type="submit">Save titles and descriptions</button>
           </form>
 <?php endif; ?>
-<?php if (count($gallery) < GALLERY_MAX): ?>
+<?php if ($videoCount < VIDEO_GALLERY_MAX): ?>
+          <form method="post" enctype="multipart/form-data" class="gallery-upload stack" data-video-upload>
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="video_upload">
+            <div class="form-grid">
+              <div class="field">
+                <label for="v-file">Add a video</label>
+                <input id="v-file" name="video" type="file" accept="video/mp4,.mp4" required data-video-file>
+                <p class="hint">MP4 (H.264), up to <?= (int) floor(video_upload_limit() / 1048576) ?> MB — the most this server accepts. Larger videos: compress them first (1080p or smaller), or send them with Import projects. <?= VIDEO_GALLERY_MAX - $videoCount ?> more allowed.</p>
+              </div>
+              <div class="field">
+                <label for="v-poster">Poster image</label>
+                <input id="v-poster" name="video_poster" type="file" accept="image/jpeg,image/png,image/webp" data-video-poster>
+                <p class="hint">The still shown before the video plays. Leave empty to use a frame from the video.</p>
+                <img class="thumb" alt="" width="96" height="64" hidden data-video-poster-preview>
+              </div>
+              <div class="field">
+                <label for="v-title">Video title</label>
+                <input id="v-title" name="video_title" type="text" maxlength="200" placeholder="e.g. Setting a precast tank">
+              </div>
+              <div class="field">
+                <label for="v-alt">Video description</label>
+                <input id="v-alt" name="video_alt" type="text" maxlength="255" placeholder="e.g. A boom truck lowers a precast tank into a trench">
+                <p class="hint">Used for search engines and screen readers. Empty uses the project title.</p>
+              </div>
+            </div>
+            <button class="btn btn--primary btn--sm" type="submit">Upload video</button>
+          </form>
+<?php endif; ?>
+<?php if ($photoCount < GALLERY_MAX): ?>
           <form method="post" enctype="multipart/form-data" class="gallery-upload stack">
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="gallery_upload">
@@ -449,7 +536,7 @@ admin_start($isNew ? 'Add project' : 'Edit project', 'projects');
               <div class="field">
                 <label for="g-files">Add photos</label>
                 <input id="g-files" name="gallery[]" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
-                <p class="hint">Choose up to <?= GALLERY_MAX - count($gallery) ?> more. JPG, PNG, or WebP, up to 10 MB each.</p>
+                <p class="hint">Choose up to <?= GALLERY_MAX - $photoCount ?> more. JPG, PNG, or WebP, up to 10 MB each.</p>
               </div>
               <div class="field">
                 <label for="g-alt">Description for these photos</label>

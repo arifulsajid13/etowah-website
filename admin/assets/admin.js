@@ -16,7 +16,54 @@
     initSeoPreview();
     initProjectSerp();
     initStrength();
+    initVideoPoster();
   });
+
+  /* Gallery video upload: when no poster image is chosen, take one from a frame of the video
+     (the server cannot read video frames). The upload still works without this: the server then asks for a poster. */
+  function initVideoPoster() {
+    var form = document.querySelector("[data-video-upload]");
+    if (!form || typeof DataTransfer !== "function") return;
+    var fileInput = form.querySelector("[data-video-file]");
+    var posterInput = form.querySelector("[data-video-poster]");
+    var preview = form.querySelector("[data-video-poster-preview]");
+    var autoPoster = false;
+
+    fileInput.addEventListener("change", function () {
+      var file = fileInput.files[0];
+      if (!file || (posterInput.files.length && !autoPoster)) return;
+      var url = URL.createObjectURL(file);
+      var video = document.createElement("video");
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.addEventListener("loadedmetadata", function () {
+        video.currentTime = Math.min(1, (video.duration || 2) / 2);
+      });
+      video.addEventListener("seeked", function () {
+        var canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        canvas.toBlob(function (blob) {
+          URL.revokeObjectURL(url);
+          if (!blob) return;
+          var transfer = new DataTransfer();
+          transfer.items.add(new File([blob], "poster.jpg", { type: "image/jpeg" }));
+          posterInput.files = transfer.files;
+          autoPoster = true;
+          preview.src = URL.createObjectURL(blob);
+          preview.hidden = false;
+        }, "image/jpeg", 0.9);
+      }, { once: true });
+      video.addEventListener("error", function () { URL.revokeObjectURL(url); });
+      video.src = url;
+    });
+    posterInput.addEventListener("change", function () {
+      autoPoster = false;
+      preview.hidden = true;
+    });
+  }
 
   /* Project SEO: Google preview showing the automatic values when fields are empty */
   function initProjectSerp() {
@@ -146,7 +193,7 @@
       form.addEventListener("submit", function (event) {
         if (form.dataset.confirmed === "1") return;
         event.preventDefault();
-        askConfirm(form.getAttribute("data-confirm"), "Yes, delete", function () {
+        askConfirm(form.getAttribute("data-confirm"), form.getAttribute("data-confirm-ok") || "Yes, delete", function () {
           form.dataset.confirmed = "1";
           form.submit();
         });

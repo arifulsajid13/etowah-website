@@ -8,6 +8,7 @@ if (!$p) {
 
 $services = project_service_keys((int) $p['id']);
 $gallery = project_gallery((int) $p['id']);
+$videos = array_values(array_filter($gallery, fn($m) => $m['media_type'] === 'video'));
 $related = projects_related($p, 3);
 $hero = project_image($p);
 $market = MARKETS[$p['market']];
@@ -18,7 +19,10 @@ layout_start('projects', [
     'description' => project_meta_description($p),
     'path'        => project_url($p),
     'og_image'    => $hero['path'] !== '' ? site_url(media_url($hero['path'])) : null,
-    'jsonld'      => [breadcrumb_jsonld([['Home', '/'], ['Projects', '/projects'], [$p['title'], project_url($p)]])],
+    'jsonld'      => array_merge(
+        [breadcrumb_jsonld([['Home', '/'], ['Projects', '/projects'], [$p['title'], project_url($p)]])],
+        array_map(fn($v) => video_object_jsonld($p, $v), $videos)
+    ),
 ]);
 ?>
 
@@ -61,21 +65,28 @@ layout_start('projects', [
     <section class="section section--alt" aria-labelledby="gallery-title">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow">PROJECT PHOTOS</p>
+          <p class="eyebrow"><?= $videos ? 'PROJECT PHOTOS &amp; VIDEO' : 'PROJECT PHOTOS' ?></p>
           <h2 id="gallery-title">Project gallery.</h2>
         </div>
         <ul class="gallery-grid" data-gallery data-stagger>
 <?php foreach ($gallery as $i => $img): $webp = is_file(ROOT . '/' . webp_twin($img['path'])) ? media_url(webp_twin($img['path'])) : ''; ?>
+<?php if ($img['media_type'] === 'video'): $title = trim((string) $img['title']) ?: $p['title']; ?>
+          <li><button class="gallery-item gallery-item--video" type="button" data-video="<?= e(media_url((string) $img['video_path'])) ?>" data-full="<?= e(media_url($img['path'])) ?>" data-webp="<?= e($webp) ?>" data-alt="<?= e($img['alt']) ?>" data-caption="<?= e($title) ?>" data-width="<?= (int) $img['width'] ?>" data-height="<?= (int) $img['height'] ?>" aria-label="Play video <?= $i + 1 ?> of <?= count($gallery) ?>: <?= e($title) ?>"><?= image_html($img) ?><span class="gallery-play"><?= icon('play') ?></span></button></li>
+<?php else: ?>
           <li><button class="gallery-item" type="button" data-full="<?= e(media_url($img['path'])) ?>" data-webp="<?= e($webp) ?>" data-alt="<?= e($img['alt']) ?>" data-width="<?= (int) $img['width'] ?>" data-height="<?= (int) $img['height'] ?>" aria-label="Open photo <?= $i + 1 ?> of <?= count($gallery) ?>: <?= e($img['alt']) ?>"><?= image_html($img) ?></button></li>
+<?php endif; ?>
 <?php endforeach; ?>
         </ul>
       </div>
     </section>
 
-    <dialog class="lightbox" aria-label="Photo viewer" data-lightbox>
+    <dialog class="lightbox" aria-label="<?= $videos ? 'Photo and video viewer' : 'Photo viewer' ?>" data-lightbox>
       <div class="lightbox-inner">
         <figure class="lightbox-figure">
           <picture><source type="image/webp" data-lightbox-source><img src="" alt="" data-lightbox-img></picture>
+<?php if ($videos): ?>
+          <video class="lightbox-video" controls preload="none" playsinline hidden data-lightbox-video></video>
+<?php endif; ?>
           <figcaption class="lightbox-caption"><span data-lightbox-caption></span> <span class="lightbox-count" data-lightbox-count></span></figcaption>
         </figure>
         <button class="lightbox-btn lightbox-prev" type="button" data-lightbox-prev aria-label="Previous photo"><?= icon('chevron-right') ?></button>

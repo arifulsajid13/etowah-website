@@ -84,11 +84,17 @@ CREATE TABLE IF NOT EXISTS project_services (
   CONSTRAINT fk_ps_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Optional photo gallery on each project page (max 12 per project, enforced in the dashboard).
+-- Optional gallery on each project page: up to 12 photos and 3 videos (enforced in the dashboard and the import).
+-- Videos: path = poster image, video_path = MP4, alt = description.
 CREATE TABLE IF NOT EXISTS project_images (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   project_id INT UNSIGNED NOT NULL,
+  media_type ENUM('image','video') NOT NULL DEFAULT 'image',
   path VARCHAR(255) NOT NULL,
+  video_path VARCHAR(255) NULL,
+  title VARCHAR(200) NULL,
+  upload_date DATE NULL,
+  duration INT UNSIGNED NULL,
   alt VARCHAR(255) NOT NULL DEFAULT '',
   width INT UNSIGNED NOT NULL DEFAULT 0,
   height INT UNSIGNED NOT NULL DEFAULT 0,

@@ -132,7 +132,7 @@ When your developer sends you **etowah-update.zip**:
 3. Delete **etowah-update.zip** after it is extracted.
 4. Open any page of the website once. Any database changes in the update run by themselves on that first visit.
 
-The update zip contains only code. It never includes the items below, so extracting it leaves them untouched.
+The update zip contains only code (plus the small `uploads/.htaccess` protection file). It never includes the items below, so extracting it leaves them untouched.
 
 If your developer sends single files instead, upload only those files, replacing the old ones.
 
@@ -143,5 +143,17 @@ Never overwrite or delete:
    - the `storage` / `etowah-storage` folder — resumes and logs.
 
 Never upload an `install` folder again unless your developer asks you to.
+
+## 11. Importing projects, photos, and videos
+
+When your developer sends you **etowah-projects-import.zip** (projects with their photos and videos):
+
+1. Install the matching **etowah-update.zip** first (step 10), if you received one.
+2. In the dashboard, open **Projects → Import projects**. The page shows the exact folder to use. It is the `import` folder inside your private storage folder, normally `etowah-storage/import` next to `public_html` (or `public_html/storage/import` on sites that keep storage inside `public_html`).
+3. In File Manager, open that folder and upload **etowah-projects-import.zip** into it. You don’t need to extract it.
+4. Reload **Import projects**. Check the preview (new projects, updated projects, number of photos and videos), then press **Import**.
+5. The package files are deleted from the folder automatically after a successful import.
+
+The import never overwrites text you edited in the dashboard, a real main photo you uploaded, or a homepage choice you changed. Running it twice adds nothing twice.
 
 Need help? Tell your developer what you see on the screen. The dashboard's **Site Settings → System** box shows the server's health and the most recent errors.

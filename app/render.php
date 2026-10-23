@@ -119,6 +119,24 @@ function job_posting_jsonld(array $job): array
     return array_filter($data, fn($v) => $v !== null && $v !== '');
 }
 
+/** VideoObject structured data for a gallery video. uploadDate: the recorded date, or the day it was added. */
+function video_object_jsonld(array $project, array $video): array
+{
+    $data = [
+        '@context'     => 'https://schema.org',
+        '@type'        => 'VideoObject',
+        'name'         => trim((string) $video['title']) !== '' ? $video['title'] : $project['title'],
+        'description'  => trim((string) $video['alt']) !== '' ? $video['alt'] : $project['summary'],
+        'thumbnailUrl' => [site_url(media_url($video['path']))],
+        'contentUrl'   => site_url(media_url((string) $video['video_path'])),
+        'uploadDate'   => date('Y-m-d', strtotime((string) ($video['upload_date'] ?: $video['created_at']))),
+    ];
+    if ((int) $video['duration'] > 0) {
+        $data['duration'] = 'PT' . (int) $video['duration'] . 'S';
+    }
+    return $data;
+}
+
 /** BreadcrumbList structured data. $items: [[name, path], …] from Home to the current page. */
 function breadcrumb_jsonld(array $items): array
 {

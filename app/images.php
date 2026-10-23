@@ -153,6 +153,68 @@ function image_store_upload(array $file, string $type, int $maxWidth): array
     return ['path' => 'uploads/' . $type . '/' . $name . '.jpg', 'width' => $newW, 'height' => $newH];
 }
 
+const VIDEO_MAX_BYTES = 64 * 1024 * 1024;
+
+/** Largest video the dashboard accepts: 64 MB, or less when the server's PHP upload limits are lower. */
+function video_upload_limit(): int
+{
+    $bytes = function (string $v): int {
+        $n = (int) $v;
+        return match (strtoupper(substr(trim($v), -1))) { 'G' => $n << 30, 'M' => $n << 20, 'K' => $n << 10, default => $n };
+    };
+    $limits = array_filter([VIDEO_MAX_BYTES, $bytes((string) ini_get('upload_max_filesize')), $bytes((string) ini_get('post_max_size'))]);
+    return min($limits);
+}
+
+/**
+ * Validate and store an uploaded MP4 as uploads/project-video/{name}.mp4 (stored as is: the server cannot re-encode).
+ * Throws RuntimeException with a message that is safe to show to the dashboard user.
+ */
+function video_store_upload(array $file): string
+{
+    $limitMb = (int) floor(video_upload_limit() / 1048576);
+    $tooLarge = 'That video is larger than ' . $limitMb . ' MB. Compress it to an H.264 MP4 (1080p or smaller), or add it with Import projects.';
+    if (!isset($file['error']) || is_array($file['error']) || $file['error'] === UPLOAD_ERR_NO_FILE) {
+        throw new RuntimeException('Please choose a video to upload.');
+    }
+    if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE || $file['size'] > video_upload_limit()) {
+        throw new RuntimeException($tooLarge);
+    }
+    if ($file['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name']) || $file['size'] <= 0) {
+        throw new RuntimeException('The video did not upload. Please try again.');
+    }
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+    $head = (string) file_get_contents($file['tmp_name'], false, null, 0, 12);
+    if (strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION)) !== 'mp4' || $mime !== 'video/mp4' || substr($head, 4, 4) !== 'ftyp') {
+        throw new RuntimeException('Please upload the video as an MP4 file (H.264).');
+    }
+    $dir = ROOT . '/uploads/project-video';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+        throw new RuntimeException('The uploads folder is not writable. Check folder permissions in hPanel.');
+    }
+    $path = 'uploads/project-video/' . bin2hex(random_bytes(16)) . '.mp4';
+    if (!move_uploaded_file($file['tmp_name'], ROOT . '/' . $path)) {
+        throw new RuntimeException('The video could not be saved. Please try again.');
+    }
+    @chmod(ROOT . '/' . $path, 0644);
+    return $path;
+}
+
+/** Remove a previously uploaded video file. Never touches /assets. */
+function video_delete_upload(?string $path): void
+{
+    if ($path !== null && preg_match('#^uploads/project-video/[a-f0-9]{32}\.mp4$#', $path)) {
+        @unlink(ROOT . '/' . $path);
+    }
+}
+
+/** Remove the files of one gallery row: the photo (or video poster) and, for videos, the MP4. */
+function gallery_delete_files(array $row): void
+{
+    image_delete_upload((string) $row['path']);
+    video_delete_upload($row['video_path'] ?? null);
+}
+
 /** Remove a previously uploaded image (JPG + WebP). Never touches /assets. */
 function image_delete_upload(string $path): void
 {
