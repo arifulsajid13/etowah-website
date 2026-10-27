@@ -638,3 +638,23 @@ Client request: show every project as finished work, with no "Current", "Complet
 - `php -l` passes on the changed files.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+## Change utility contractors to utility construction — 2026-10-27
+
+The client asked for "utility contractor(s)" to become "utility construction" everywhere.
+
+**Changed in files:**
+- `about.php` hero subtitle: "A licensed Georgia utility construction company based in Cartersville."
+- `app/seed.php` default meta (fresh installs only; `INSERT IGNORE` never overwrites the live rows):
+  - Home title: "Etowah Construction Group | Site Development & Utility Construction in Georgia".
+  - Home, About and Careers descriptions: "utility contractor" → "utility construction company".
+- `docs/INVENTORY.md`, `docs/SPEC.md`: same wording. `docs/COPY-REVIEW.md` #5: the proposed Estimator sentence now says "underground utility construction company"; the "before" column still records the old live text.
+
+**Left unchanged on purpose:**
+- The license name: "Licensed Utility Contractor, State of Georgia" (the `license_text` default, the admin placeholder, About facts list) and "Georgia Utility Contractor License UC002776" (Underground Utilities meta).
+- `GeneralContractor` JSON-LD type, the `Contract` employment type, "one contractor for the complete civil scope" on Site Development.
+- The project import source (`tools/project-import/manifest.php`) had no matches, so `etowah-projects-import.zip` was not rebuilt.
+
+**Rebuilt:** `dist/etowah-hostinger.zip`, `dist/etowah-update.zip`.
+
+**Live site (dashboard, manual):** Pages → SEO for Home, About and Careers; Careers → Jobs → Estimator description. The installer will not change these.

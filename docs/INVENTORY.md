@@ -17,7 +17,7 @@ Captured from the `.html` files at commit `2142c5c`. Baseline screenshots (375/7
 
 | key | title | hero (w×h) | hero alt |
 |---|---|---|---|
-| home | Etowah Construction Group \| Site Development &amp; Utility Contractor in Georgia | heroes/hero-home.jpg 1920×1080 | Excavator working beside a long open utility trench with pipe in warm morning light |
+| home | Etowah Construction Group \| Site Development &amp; Utility Construction in Georgia | heroes/hero-home.jpg 1920×1080 | Excavator working beside a long open utility trench with pipe in warm morning light |
 | site-development | Site Development \| Etowah Construction Group | heroes/hero-site-development.jpg 1487×836 | Bulldozers grading red clay across a large earthwork site |
 | underground-utilities | Underground Utilities \| Etowah Construction Group | heroes/hero-underground-utilities.jpg 1487×836 | Open utility trench with gravel bedding and pipe sections staged along the site |
 | pump-stations | Pump Stations \| Etowah Construction Group | heroes/hero-pump-stations.jpg 1690×950 | Deep shored excavation with access ladders and formwork at the base |

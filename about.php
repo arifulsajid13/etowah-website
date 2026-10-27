@@ -11,7 +11,7 @@ layout_start('about');
         <div class="hero-inner">
           <nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">About</li></ol></nav>
           <h1>About Etowah</h1>
-          <p class="hero-sub">A licensed Georgia utility contractor based in Cartersville.</p>
+          <p class="hero-sub">A licensed Georgia utility construction company based in Cartersville.</p>
         </div>
       </div>
     </section>

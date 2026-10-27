@@ -117,7 +117,7 @@ Everything below must render **identically to the current design**.
 ## 5. Careers (new)
 
 ### `/careers`
-- Title: "Careers | Etowah Construction Group". Meta: "Join Etowah Construction Group, a licensed Georgia utility contractor in Cartersville. View open positions and apply."
+- Title: "Careers | Etowah Construction Group". Meta: "Join Etowah Construction Group, a licensed Georgia utility construction company in Cartersville. View open positions and apply."
 - **Hero** (inner-page style, same as Projects): image `assets/images/heroes/hero-careers.jpg`. If missing, generate it (16:9, JPG, under ~300 KB): photorealistic crew of three walking toward heavy equipment at the start of the workday on a north Georgia jobsite, pine tree line, morning light, white hard hats, yellow high-visibility vests, no visible brand names, logos, or text. Breadcrumb Home / Careers. H1 "Careers". Subtitle "Build your career with a team that builds from the ground up."
 - **Intro** (white, narrow centered): eyebrow "JOIN OUR TEAM", H2 "Build with Etowah.", text: "Etowah Construction Group delivers site development, underground utility, roadway, and pump-station construction for municipal, commercial, and residential clients. When we have openings, you will find them here."
 - **Open positions** (`--bg-alt`): eyebrow "OPEN POSITIONS", H2 "Current openings." Cards for each `open` job (title, meta line "LOCATION • EMPLOYMENT TYPE", ~160-character excerpt, "View & Apply →").

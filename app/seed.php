@@ -18,15 +18,15 @@ function run_schema(PDO $pdo): void
 function seed_database(PDO $pdo): void
 {
     $pages = [
-        'home' => ['Etowah Construction Group | Site Development & Utility Contractor in Georgia', 'Licensed Georgia utility contractor in Cartersville delivering site development, underground utilities, pump stations, and roadway construction for municipal, commercial, and residential clients.'],
+        'home' => ['Etowah Construction Group | Site Development & Utility Construction in Georgia', 'Licensed Georgia utility construction company in Cartersville delivering site development, underground utilities, pump stations, and roadway construction for municipal, commercial, and residential clients.'],
         'site-development' => ['Site Development | Etowah Construction Group', 'Clearing, grading, mass earthwork, site preparation, and retaining walls for municipal, commercial, and residential projects in Georgia.'],
         'underground-utilities' => ['Underground Utilities | Etowah Construction Group', 'Water distribution, sanitary sewer, and storm drainage installation for municipal, commercial, and residential projects. Georgia Utility Contractor License UC002776.'],
         'pump-stations' => ['Pump Stations | Etowah Construction Group', 'Pump station new construction and rehabilitation — bypass pumping, wet wells, pumps, process piping, and electrical equipment for municipal water and wastewater systems.'],
         'roadways-stormwater' => ['Roadways & Stormwater | Etowah Construction Group', 'Asphalt paving, DOT-road work, curb and gutter, public-roadway tie-ins, and underground stormwater retention in Georgia.'],
         'markets' => ['Markets | Etowah Construction Group', 'Etowah Construction Group serves municipal water and wastewater, commercial development, residential development, and roadway infrastructure clients in Georgia and Tennessee.'],
         'projects' => ['Projects | Etowah Construction Group', 'Site development, underground utility, pump station, and roadway projects across Georgia and Tennessee.'],
-        'about' => ['About | Etowah Construction Group', 'Etowah Construction Group is a licensed Georgia utility contractor in Cartersville delivering site development, underground utility, roadway, and pump-station construction.'],
-        'careers' => ['Careers | Etowah Construction Group', 'Join Etowah Construction Group, a licensed Georgia utility contractor in Cartersville. View open positions and apply.'],
+        'about' => ['About | Etowah Construction Group', 'Etowah Construction Group is a licensed Georgia utility construction company in Cartersville delivering site development, underground utility, roadway, and pump-station construction.'],
+        'careers' => ['Careers | Etowah Construction Group', 'Join Etowah Construction Group, a licensed Georgia utility construction company in Cartersville. View open positions and apply.'],
         'contact' => ['Contact | Etowah Construction Group', 'Discuss your site development, underground utility, pump station, or roadway project with Etowah Construction Group. Call ' . SETTING_DEFAULTS['phone'] . '.'],
     ];
 
