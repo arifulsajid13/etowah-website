@@ -88,7 +88,7 @@ layout_start($pageKey);
             <li><span class="check-badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Full-site commercial packages</li>
         </ul>
         <hr class="proof-divider">
-        <p>Our crews carry projects from clearing and mass grading through utilities, curb and gutter, and asphalt paving — one contractor for the complete civil scope.</p>
+        <p>Our crews carry projects from clearing and mass grading through utilities, curb and gutter, and asphalt paving — one team for the complete civil scope.</p>
         <a class="text-link" href="/underground-utilities">Explore Underground Utilities <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
       </div>
     </section>

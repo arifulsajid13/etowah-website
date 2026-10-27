@@ -5,7 +5,7 @@ $fields = [
     'phone'          => ['Phone', 40, 'Shown everywhere on the site, e.g. (470) 982-4069. Phone links are created automatically. The Contact page’s Google description (Pages & SEO) mentions the number too — update it there if it changes.'],
     'email'          => ['Email', 190, 'The public email address shown on the site.'],
     'city_state'     => ['City and state', 120, 'e.g. Cartersville, Georgia'],
-    'license_text'   => ['License text', 160, 'e.g. Licensed Utility Contractor, State of Georgia'],
+    'license_text'   => ['License text', 160, 'e.g. Licensed in the State of Georgia'],
     'license_number' => ['License number', 40, ''],
     'markets_line'   => ['Markets line (footer)', 160, 'Short line under the logo in the footer.'],
 ];

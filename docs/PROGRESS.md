@@ -658,3 +658,27 @@ The client asked for "utility contractor(s)" to become "utility construction" ev
 **Rebuilt:** `dist/etowah-hostinger.zip`, `dist/etowah-update.zip`.
 
 **Live site (dashboard, manual):** Pages → SEO for Home, About and Careers; Careers → Jobs → Estimator description. The installer will not change these.
+
+## Replace utility contractor wording with utility construction — 2026-10-27
+
+Follow-up to the entry above. The client's decision: no public text says "utility contractor", including the license line.
+
+**Changed in files:**
+- License line: "Licensed in the State of Georgia", followed by "License No. UC002776".
+  - `app/settings.php` `license_text` default and the admin placeholder in `admin/inc/views/settings.php`. The footer and Contact page print this setting.
+  - `about.php` facts list: "Licensed in / State of Georgia", then the existing "License No. / UC002776" row.
+- `app/seed.php` meta (fresh installs only):
+  - Home title: "Etowah Construction Group | Site Development & Underground Utilities in Georgia".
+  - Home, About and Careers descriptions now use "Etowah Construction Group LLC", "underground utility construction" and "License No. UC002776".
+  - Underground Utilities description ends "Georgia License No. UC002776."
+- `site-development.php`: "one contractor for the complete civil scope" → "one team for the complete civil scope".
+- `docs/INVENTORY.md`, `docs/SPEC.md` match the new wording.
+- New `docs/LIVE-DB-FIXES.md`: the exact text to paste into the live dashboard (License text; Home, Underground Utilities, About and Careers meta; Estimator title, slug and first sentence; Superintendents first paragraph), plus a read-only phpMyAdmin query that lists any leftover "contract", "contratore" or misspelled "utiliti…" text.
+
+**Kept:** the `GeneralContractor` JSON-LD type, the `Contract` employment type, and the history notes in COPY-REVIEW.md and PROGRESS.md.
+
+**Rebuilt:** `dist/etowah-update.zip` (contains `about.php`, `app/settings.php`, `app/seed.php`, `site-development.php`, `admin/inc/views/settings.php`) and `dist/etowah-hostinger.zip`. `etowah-projects-import.zip` is unchanged because the import data had no matches.
+
+**Checked:** `php -l` passes on the five changed PHP files; a repo search finds no "utility contractor" in public code. The phpMyAdmin query was not run locally (no local MariaDB this session).
+
+**Live site:** upload `etowah-update.zip`, then make the dashboard edits in `docs/LIVE-DB-FIXES.md` and run its query.

@@ -9,7 +9,7 @@ Captured from the `.html` files at commit `2142c5c`. Baseline screenshots (375/7
   - Active state: `aria-current="page"` on the nav-link; on service pages the dropdown button gets `is-active` and the dropdown link gets `aria-current="page"`.
 - **CTA band** (`footer.site-footer` → `.cta-row`): h2.cta-title (per page), contact name, tel `+16787638047` "678-763-8047", mailto Kenny@etowahconstruction.com, "Get in Touch" → contact.
   - Titles: default "Let’s discuss your next project."; site-dev "…your site development project."; utilities "…your utility project."; pump "…your pump station project."; roadways "…your roadway project."
-- **Footer grid:** brand col (logo, "Licensed Utility Contractor, State of Georgia. License No. UC002776.", "Municipal • Commercial • Residential • Roadway"), Menu (Home, Markets, Projects, About, Contact), Services (4), Contact (name, phone, email, "Cartersville, Georgia"). Legal: "© 2026 Etowah Construction Group LLC · Licensed Utility Contractor, State of Georgia · License No. UC002776".
+- **Footer grid:** brand col (logo, "Licensed in the State of Georgia. License No. UC002776.", "Municipal • Commercial • Residential • Roadway"), Menu (Home, Markets, Projects, About, Contact), Services (4), Contact (name, phone, email, "Cartersville, Georgia"). Legal: "© 2026 Etowah Construction Group LLC · Licensed in the State of Georgia · License No. UC002776".
 - **Contact page** uses `site-footer site-footer--compact` (no CTA row).
 - CTA background image `assets/images/sections/cta-bg.jpg` (2100×900) is set in CSS on `.site-footer`.
 
@@ -17,7 +17,7 @@ Captured from the `.html` files at commit `2142c5c`. Baseline screenshots (375/7
 
 | key | title | hero (w×h) | hero alt |
 |---|---|---|---|
-| home | Etowah Construction Group \| Site Development &amp; Utility Construction in Georgia | heroes/hero-home.jpg 1920×1080 | Excavator working beside a long open utility trench with pipe in warm morning light |
+| home | Etowah Construction Group \| Site Development &amp; Underground Utilities in Georgia | heroes/hero-home.jpg 1920×1080 | Excavator working beside a long open utility trench with pipe in warm morning light |
 | site-development | Site Development \| Etowah Construction Group | heroes/hero-site-development.jpg 1487×836 | Bulldozers grading red clay across a large earthwork site |
 | underground-utilities | Underground Utilities \| Etowah Construction Group | heroes/hero-underground-utilities.jpg 1487×836 | Open utility trench with gravel bedding and pipe sections staged along the site |
 | pump-stations | Pump Stations \| Etowah Construction Group | heroes/hero-pump-stations.jpg 1690×950 | Deep shored excavation with access ladders and formwork at the base |

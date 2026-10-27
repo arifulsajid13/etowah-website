@@ -24,7 +24,7 @@ layout_start('about');
           <p>Established in May 2024, Etowah Construction Group delivers site development, underground utility, roadway, and pump-station construction for municipal, commercial, and residential clients.</p>
           <p>Our work includes full-site packages, large-diameter water infrastructure, pump-station rehabilitation, DOT-road paving, deep excavation, bypass operations, and critical public-roadway tie-ins.</p>
           <dl class="credentials">
-            <div><dt>Licensed Utility Contractor</dt><dd>State of Georgia</dd></div>
+            <div><dt>Licensed in</dt><dd>State of Georgia</dd></div>
             <div><dt>License No.</dt><dd><?= e(setting('license_number')) ?></dd></div>
             <div><dt>Based in</dt><dd>Cartersville, GA</dd></div>
           </dl>
