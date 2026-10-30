@@ -14,20 +14,6 @@ if ($type === 'inquiries') {
     $rows = db_all("SELECT a.id, a.created_at, a.status, COALESCE(j.title, 'General') AS position, a.name, a.email, a.phone, a.message, a.resume_original_name, a.notes
                       FROM applications a LEFT JOIN jobs j ON j.id = a.job_id WHERE {$where} ORDER BY {$order}", $params);
     $header = ['ID', 'Received', 'Status', 'Position', 'Name', 'Email', 'Phone', 'Message', 'Resume file', 'Notes'];
-} elseif ($type === 'invoices') {
-    [$where, $params, $order] = invoice_query(invoice_filters());
-    $rows = [];
-    foreach (db_all("SELECT * FROM invoices WHERE {$where} ORDER BY {$order}", $params) as $inv) {
-        $rows[] = [
-            $inv['number'], $inv['issue_date'], $inv['due_date'], INVOICE_STATUSES[invoice_display_status($inv)] ?? $inv['status'],
-            $inv['customer_name'], $inv['customer_company'], $inv['customer_email'], $inv['customer_phone'], $inv['project_ref'], $inv['terms'],
-            money_plain((int) $inv['subtotal_cents']), tax_rate_label(tax_rate_units((string) $inv['tax_rate'])), money_plain((int) $inv['tax_cents']),
-            money_plain((int) $inv['total_cents']), money_plain((int) $inv['amount_paid_cents']), money_plain($inv['status'] === 'void' ? 0 : invoice_balance($inv)),
-            $inv['sent_at'], $inv['viewed_at'], $inv['paid_at'],
-        ];
-    }
-    $header = ['Number', 'Issue date', 'Due date', 'Status', 'Customer', 'Company', 'Email', 'Phone', 'Project', 'Terms',
-               'Subtotal', 'Tax rate %', 'Tax', 'Total', 'Paid', 'Balance', 'Sent', 'Viewed', 'Paid in full'];
 } else {
     http_response_code(404);
     exit('Unknown export');

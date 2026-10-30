@@ -6,7 +6,6 @@ $user = require_admin();
 const ADMIN_ROUTES = [
     'overview', 'inquiries', 'inquiry', 'projects', 'project', 'jobs', 'job',
     'applications', 'application', 'pages', 'page', 'settings', 'users', 'import',
-    'invoices', 'invoice', 'invoice_edit', 'payments',
 ];
 
 $route = get_str('p');

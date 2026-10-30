@@ -751,3 +751,47 @@ Follow-up to the entry above. The client's decision: no public text says "utilit
 - fastcgi/litespeed_finish_request.
 
 **Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]
+
+## Remove invoicing and payments — 2026-10-31
+
+**Commit:** "Remove invoicing and payments"
+
+The client asked for the invoicing and online payment system to be removed completely.
+
+**Code:** `git revert` of "Add invoicing and online payments (Stripe, Authorize.net)" applied cleanly; it was the last commit, so no later change was lost. This removes:
+- the admin Invoices section and its sidebar link, the Overview invoice cards, and the Settings tabs / "Payments & Invoices" tab;
+- the invoice CSV export;
+- `/pay` (`pay.php`, the invoice partial, `pay.css`, `pay.js`) and its `.htaccess` rewrites;
+- `webhooks/`, and `cron/` with its deny rule;
+- the invoice emails, the HTML option in `mail.php`, and the `styles` / `scripts` / `footer_style` layout options;
+- the footer "Pay an Invoice" link and the robots.txt /pay and /webhooks lines;
+- `docs/PAYMENTS.md`, `tools/test-payments.php`, and DEPLOY.md step 12.
+
+The history entry above was kept.
+
+**Database:**
+- `SCHEMA_VERSION` = 8; it was not lowered.
+- Migration v8 drops `invoice_reminders`, `payments`, `invoice_items`, `gateway_events` and `invoices` (all `DROP TABLE IF EXISTS`, children before `invoices` because of the foreign keys). It also deletes the settings rows `invoice\_%`, `stripe\_%` and `authnet\_%`. No other setting uses these prefixes.
+- `schema.sql` and `seed.php` (SETTING_DEFAULTS) are back to the pre-invoicing state, so fresh installs never create these tables or settings and are seeded straight at version 8.
+- `activity_log` rows about invoices are kept as history.
+
+**Checked locally** (portable MariaDB; all test databases were dropped and config.php restored afterwards):
+- **Migration**, on three databases:
+  - v7 with invoicing tables, data and settings: all 5 tables and 6 settings removed, version 8, projects and inquiries untouched; a second run is harmless.
+  - v6 that never had the tables: version 8, no errors.
+  - Fresh install (`run_schema` + `seed_database`): no invoicing tables or settings, version 8.
+- **Pages** (copy of the local data, temporary admin):
+  - Overview, Site Settings and Users render. `?p=invoices` and `?p=payments` fall back to Overview. No new PHP errors.
+  - Home and Contact render without the footer link.
+  - `/pay`, `/pay/{x}` and `/webhooks/stripe.php` return 404 (dev router matching `.htaccess`).
+  - robots.txt is back to its 4 Disallow lines.
+- **Search:** "invoice", "stripe", "authnet", "authorize", "/pay" and "webhook" appear in the repo only in this file and in the v8 migration.
+- `php -l` passes on every changed PHP file.
+
+**Packages:**
+- `etowah-update.zip`: 73 files, with migration v8, and no pay, webhook, cron or invoice files.
+- `etowah-hostinger.zip`: 107 files.
+
+**Live site:** follow `docs/REMOVE-INVOICING-LIVE.md`. Upload the update and load one page; this runs v8 and permanently deletes invoice data. Then delete by hand the 12 files and 2 folders listed there, and remove any Cron Job and gateway webhooks that were set up.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

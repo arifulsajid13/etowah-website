@@ -7,7 +7,6 @@ define('ETOWAH_ADMIN', true);
 
 require dirname(__DIR__, 2) . '/app/bootstrap.php';
 require APP . '/auth.php';
-require APP . '/payments.php'; // invoices, invoice emails, gateways
 require __DIR__ . '/helpers.php';
 require __DIR__ . '/layout.php';
 

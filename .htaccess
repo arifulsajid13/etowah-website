@@ -26,7 +26,7 @@ AddType video/mp4 .mp4
   # RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
   # --- Private folders and files -------------------------------------------
-  RewriteRule ^(app|storage|admin/inc|cron)(/|$) - [F,L]
+  RewriteRule ^(app|storage|admin/inc)(/|$) - [F,L]
   RewriteRule (^|/)\.(?!well-known/) - [F,L]
   RewriteCond %{DOCUMENT_ROOT}/app/install.lock -f
   RewriteRule ^install(/|$) - [F,L]
@@ -51,10 +51,6 @@ AddType video/mp4 .mp4
   # --- Clean URLs ---------------------------------------------------------------
   RewriteRule ^careers/([a-z0-9-]+)/?$ careers.php?slug=$1 [L,QSA]
   RewriteRule ^projects/([a-z0-9-]+)/?$ project.php?slug=$1 [L,QSA]
-  # Invoice pay pages: /pay, /pay/{token}, /pay/{token}/print|return|checkout (pay.php answers 404 for an unknown token)
-  RewriteRule ^pay/?$ pay.php [L,QSA]
-  RewriteRule ^pay/([^/]+)/?$ pay.php?token=$1 [L,QSA]
-  RewriteRule ^pay/([^/]+)/(print|return|checkout)/?$ pay.php?token=$1&view=$2 [L,QSA]
   RewriteRule ^(site-development|underground-utilities|pump-stations|roadways-stormwater|markets|projects|about|careers|contact)$ $1.php [L]
 </IfModule>
 

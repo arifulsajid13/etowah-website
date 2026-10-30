@@ -13,11 +13,6 @@ $appPrev = $count('SELECT COUNT(*) FROM applications WHERE created_at >= NOW() -
 $openJobs = $count("SELECT COUNT(*) FROM jobs WHERE status = 'open'");
 $awaiting = $count("SELECT COUNT(*) FROM inquiries WHERE status = 'new'") + $count("SELECT COUNT(*) FROM applications WHERE status = 'new'");
 
-// Invoices: unpaid balance, overdue, and money received this month (refunds subtracted).
-$outstanding = $count("SELECT COALESCE(SUM(GREATEST(total_cents - amount_paid_cents, 0)), 0) FROM invoices WHERE status IN ('sent','viewed','processing','partially_paid','overdue')");
-$overdueRow = db_one('SELECT COUNT(*) AS n, COALESCE(SUM(total_cents - amount_paid_cents), 0) AS amount FROM invoices WHERE ' . INVOICE_OVERDUE_SQL);
-$paidMonth = $count("SELECT COALESCE(SUM(amount_cents), 0) FROM payments WHERE status IN ('succeeded','refunded') AND completed_at >= '" . date('Y-m-01') . "'");
-
 $latestInquiries = db_all('SELECT id, name, company, project_type, status, created_at FROM inquiries ORDER BY created_at DESC, id DESC LIMIT 5');
 $latestApplications = db_all('SELECT a.id, a.name, a.status, a.created_at, j.title AS job_title FROM applications a LEFT JOIN jobs j ON j.id = a.job_id ORDER BY a.created_at DESC, a.id DESC LIMIT 5');
 
@@ -83,24 +78,6 @@ admin_start('Overview', 'overview');
             <span class="stat-label">Awaiting reply</span>
             <span class="stat-value"><?= $awaiting ?></span>
             <span class="trend">Inquiries + applications marked “New”</span>
-          </a>
-        </section>
-
-        <section class="stat-grid stat-grid--3" aria-label="Invoices">
-          <a class="stat-card" href="<?= e(admin_url('invoices', ['status' => 'open'])) ?>">
-            <span class="stat-label">Outstanding</span>
-            <span class="stat-value"><?= e(money($outstanding)) ?></span>
-            <span class="trend">Unpaid balance on sent invoices</span>
-          </a>
-          <a class="stat-card" href="<?= e(admin_url('invoices', ['status' => 'overdue'])) ?>">
-            <span class="stat-label">Overdue</span>
-            <span class="stat-value"><?= e(money((int) $overdueRow['amount'])) ?></span>
-            <span class="trend<?= $overdueRow['n'] ? ' trend--down' : '' ?>"><?= (int) $overdueRow['n'] ?> <?= (int) $overdueRow['n'] === 1 ? 'invoice' : 'invoices' ?> past the due date</span>
-          </a>
-          <a class="stat-card" href="<?= e(admin_url('invoices')) ?>">
-            <span class="stat-label">Paid this month</span>
-            <span class="stat-value"><?= e(money($paidMonth)) ?></span>
-            <span class="trend">Received since <?= e(date('M j')) ?></span>
           </a>
         </section>
 

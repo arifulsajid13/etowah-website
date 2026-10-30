@@ -29,13 +29,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Inter:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
-<?php foreach ($styles ?? [] as $style): ?>
-  <link rel="stylesheet" href="<?= e(asset($style)) ?>">
-<?php endforeach; ?>
   <script src="<?= e(asset('js/main.js')) ?>" defer></script>
-<?php foreach ($scripts ?? [] as $script): ?>
-  <script src="<?= e(asset($script)) ?>" defer></script>
-<?php endforeach; ?>
 <?php foreach ($jsonld as $data): ?>
   <?= jsonld_script($data) ?>
 

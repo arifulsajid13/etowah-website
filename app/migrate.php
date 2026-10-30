@@ -6,7 +6,7 @@ declare(strict_types=1);
  * The current version is stored in settings.schema_version; fresh installs get it from the seed.
  */
 
-const SCHEMA_VERSION = 7;
+const SCHEMA_VERSION = 8;
 
 /** Run any pending upgrades once. Called from bootstrap on every request (one cheap settings lookup). */
 function migrate_if_needed(): void
@@ -85,12 +85,14 @@ function run_migrations(PDO $pdo, int $from): void
             }
         }
     }
-    if ($from < 7) {
-        // v7: invoices and online payments. schema.sql only uses CREATE TABLE IF NOT EXISTS, so running it again is safe.
-        require_once APP . '/seed.php';
-        run_schema($pdo);
-        // The invoice counter needs a real row so it can be locked while a number is taken.
-        $pdo->prepare("INSERT IGNORE INTO settings (k, v) VALUES ('invoice_next_number', ?)")->execute([SETTING_DEFAULTS['invoice_next_number']]);
+    // v7 added invoicing and online payments; it was removed again before going into use.
+    if ($from < 8) {
+        // v8: remove the v7 invoicing tables and settings. IF EXISTS keeps this safe on databases that never had them.
+        // invoice_reminders, payments and invoice_items reference invoices, so they are dropped first.
+        foreach (['invoice_reminders', 'payments', 'invoice_items', 'gateway_events', 'invoices'] as $table) {
+            $pdo->exec("DROP TABLE IF EXISTS {$table}");
+        }
+        $pdo->exec("DELETE FROM settings WHERE k LIKE 'invoice\\_%' OR k LIKE 'stripe\\_%' OR k LIKE 'authnet\\_%'");
     }
     $stmt = $pdo->prepare("INSERT INTO settings (k, v) VALUES ('schema_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)");
     $stmt->execute([(string) SCHEMA_VERSION]);
