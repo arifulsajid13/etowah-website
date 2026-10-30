@@ -10,10 +10,10 @@ require_once APP . '/vendor/PHPMailer/src/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 
 /**
- * Send a plain-text email. Returns true on success; failures are logged, never shown.
+ * Send a plain-text email, with an optional HTML version. Returns true on success; failures are logged, never shown.
  * $mail: transport (smtp|mail|log), host, port, encryption (tls|ssl|none), username, password, from, from_name.
  */
-function mail_send_with(array $mail, array $to, string $subject, string $body, ?string $replyTo = null, string $replyName = ''): bool
+function mail_send_with(array $mail, array $to, string $subject, string $body, ?string $replyTo = null, string $replyName = '', string $html = ''): bool
 {
     $to = array_values(array_filter($to, 'valid_email'));
     $from = (string) ($mail['from'] ?? '');
@@ -61,8 +61,14 @@ function mail_send_with(array $mail, array $to, string $subject, string $body, ?
             $mailer->addReplyTo($replyTo, $replyName);
         }
         $mailer->Subject = $subject;
-        $mailer->Body = $body;
-        $mailer->isHTML(false);
+        if ($html !== '') {
+            $mailer->isHTML(true);
+            $mailer->Body = $html;
+            $mailer->AltBody = $body;
+        } else {
+            $mailer->isHTML(false);
+            $mailer->Body = $body;
+        }
         $mailer->send();
         return true;
     } catch (Throwable $e) {
@@ -73,9 +79,9 @@ function mail_send_with(array $mail, array $to, string $subject, string $body, ?
 }
 
 /** Send using the configured mail settings. */
-function mail_send(array $to, string $subject, string $body, ?string $replyTo = null, string $replyName = ''): bool
+function mail_send(array $to, string $subject, string $body, ?string $replyTo = null, string $replyName = '', string $html = ''): bool
 {
-    return mail_send_with((array) config('mail', []), $to, $subject, $body, $replyTo, $replyName);
+    return mail_send_with((array) config('mail', []), $to, $subject, $body, $replyTo, $replyName, $html);
 }
 
 /** Keep visitor-supplied text out of email headers. */

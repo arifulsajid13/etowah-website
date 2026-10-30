@@ -21,6 +21,37 @@ const SETTING_DEFAULTS = [
     'stat2_label' => 'Roadway Asphalt',     'stat2_value' => '5.5 miles',
     'stat3_label' => 'Mass Earthwork',      'stat3_value' => '~85,000 CY',
     'stat4_label' => 'Deep Excavation',     'stat4_value' => 'Up to 35 ft',
+    // Invoices and online payments. Keys listed in SECRET_SETTINGS are stored encrypted (app/crypto.php).
+    'invoice_prefix'                => 'ECG-',
+    'invoice_next_number'           => '1001',
+    'invoice_default_terms'         => 'Net 30',
+    'invoice_default_tax_rate'      => '0',
+    'invoice_tax_label'             => 'Sales tax',
+    'invoice_footer_note'           => 'Thank you for your business.',
+    'invoice_payable_to'            => "Etowah Construction Group LLC\nCartersville, Georgia",
+    'invoice_notify_email'          => 'ECG@etowahconstruction.com',
+    'invoice_reminders_enabled'     => '0',
+    'invoice_reminder_before_days'  => '3',
+    'invoice_reminder_overdue_days' => '1,7,14',
+    'stripe_enabled'                => '0',
+    'stripe_mode'                   => 'test',
+    'stripe_secret_key_test'        => '',
+    'stripe_secret_key_live'        => '',
+    'stripe_webhook_secret_test'    => '',
+    'stripe_webhook_secret_live'    => '',
+    'stripe_allow_card'             => '1',
+    'stripe_allow_ach'              => '1',
+    'authnet_enabled'               => '0',
+    'authnet_mode'                  => 'sandbox',
+    'authnet_login_id'              => '',
+    'authnet_transaction_key'       => '',
+    'authnet_signature_key'         => '',
+];
+
+/** Payment gateway secrets: encrypted at rest, shown masked, never logged. */
+const SECRET_SETTINGS = [
+    'stripe_secret_key_test', 'stripe_secret_key_live', 'stripe_webhook_secret_test', 'stripe_webhook_secret_live',
+    'authnet_transaction_key', 'authnet_signature_key',
 ];
 
 /** Public pages: key => [clean path, label used in the dashboard]. */

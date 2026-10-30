@@ -682,3 +682,72 @@ Follow-up to the entry above. The client's decision: no public text says "utilit
 **Checked:** `php -l` passes on the five changed PHP files; a repo search finds no "utility contractor" in public code. The phpMyAdmin query was not run locally (no local MariaDB this session).
 
 **Live site:** upload `etowah-update.zip`, then make the dashboard edits in `docs/LIVE-DB-FIXES.md` and run its query.
+
+## Invoicing and online payments (Stripe, Authorize.net) — 2026-10-30
+
+**Commit:** "Add invoicing and online payments (Stripe, Authorize.net)"
+
+**Database (v7, runs by itself on the first page load):** `invoices`, `invoice_items`, `payments`, `gateway_events`, plus `invoice_reminders` (so each automatic reminder goes out once). `payments.completed_at` (when the money arrived) feeds "Paid this month"; `payments.gateway_txn` holds the PaymentIntent / transaction id next to `gateway_ref` (Checkout Session / attempt id). Refunds are their own rows with negative amounts. All money is integer cents; quantities and tax rates are parsed without floats. Migration v7 runs `schema.sql` again (CREATE IF NOT EXISTS only) and adds the invoice counter row.
+
+**Decisions:**
+- **Roles:** the users table has no roles, so every dashboard user can use Invoices and payment settings (as with the rest of the dashboard).
+- **"Overdue"** is computed (due date passed, balance > 0, sent/viewed/partially paid), never stored.
+- **Statuses** are recalculated from the payments table inside the same transaction as every payment change (`invoice_recalc()`).
+- **Only drafts are fully editable.** After sending, the customer details, due date and notes can still change; amounts are locked (void + duplicate to change them).
+- **Void** is refused while an invoice has payments (refund first).
+- **Drafts** return 404 on the pay page unless a dashboard user is signed in (preview/print).
+- **Webhook safety:** a payment is applied only if the event's session/transaction matches a checkout we created (or, for Authorize.net, an invoice number of ours), the invoice is not void, the amount matches and the currency is USD. Otherwise it is not applied, the payment row is marked failed with a note, and the company is emailed to review it.
+- **Authorize.net:** every capture, refund and void is confirmed with `getTransactionDetailsRequest`. This needs the Transaction Details API switched on in the merchant account (in PAYMENTS.md).
+- **Emails** are sent after the webhook answer (fastcgi/litespeed_finish_request when available).
+- **CSP:** the pay pages send their own strict CSP whose `form-action` allows only self, checkout.stripe.com, accept.authorize.net and test.authorize.net (Chrome applies form-action to the 303 redirect to Stripe too). The rest of the public site is unchanged. The pay pages skip the footer's inline background style so the CSP needs no `unsafe-inline`.
+- **Secrets:** libsodium secretbox, key = HKDF-SHA256 of app_secret. They are shown masked, and an empty field keeps the saved value. If app_secret changes, the keys must be entered again.
+
+**New files:** `pay.php`, `webhooks/stripe.php`, `webhooks/authorizenet.php`, `cron/invoice-reminders.php` + `cron/.htaccess`, `app/crypto.php`, `app/invoices.php`, `app/invoice-mail.php`, `app/payments.php`, `partials/invoice-doc.php`, `assets/css/pay.css`, `assets/js/pay.js`, `admin/inc/views/{invoices,invoice,invoice_edit,payments}.php`, `docs/PAYMENTS.md`, `tools/test-payments.php`.
+
+**Changed:**
+- `.htaccess`: /pay rewrites; `cron/` denied.
+- `robots.php`: Disallow /pay and /webhooks/.
+- Footer: a "Pay an Invoice" link.
+- `app/mail.php`: optional HTML part.
+- `app/render.php` + `partials/head.php`: styles/scripts/footer_style options.
+- Admin:
+  - sidebar Invoices item (overdue count);
+  - overview cards;
+  - Settings tabs;
+  - CSV export;
+  - admin.js line items, live totals, customer picker and copy buttons.
+- `app/settings.php`: defaults for the new keys.
+- `DEPLOY.md` step 12.
+
+**Checked locally** (portable MariaDB, copy of `etowah_local` as `etowah_pay_test`, `php -S` + dev router, mail transport `log`; the test DB was dropped and config.php restored afterwards):
+- `php tools/test-payments.php http://127.0.0.1:8000`: **96 passed, 0 failed**. It covers:
+  - money, quantity and tax parsing and rounding;
+  - encryption round trip and masking;
+  - Stripe signatures: valid, wrong secret, tampered, more than 5 minutes old;
+  - Authorize.net signatures;
+  - Stripe card payment, replayed events, partial and full refunds, ACH processing → paid, ACH failed → back to viewed plus an admin email, amount mismatch, void invoice, a session from another app;
+  - Authorize.net capture, refund, void, mismatch, declined (with saved transaction-detail answers), and the HTTP signature checks;
+  - pay page states (sent, viewed, paid, void, draft 404, unknown token 404, no gateway, card only, missing webhook secret), print and return pages;
+  - the lookup form (match in any case, the same generic error for a wrong email, unknown number or draft);
+  - the dashboard: create with server-side totals, validation, edit, send, the locked amounts after sending, reminder, manual payment (and the refused overpayment), refused void, duplicate, void, CSRF, activity log, CSV, overview and settings (masking, keep-on-empty, invalid key refused, encrypted at rest, no secrets in logs);
+  - the cron (sends once; refused over the web).
+- Migration v6 → v7 on the first request.
+- Headless Chrome at 1440 and 375px (pay page, print, invoice list, detail, edit, settings, overview, lookup): no horizontal scroll and no JS errors. A mobile overflow of the item table on the print page was fixed, and the pay panel moved above the invoice on small screens.
+- `php -l` on all new and changed PHP files.
+
+**Packages:** `etowah-update.zip` (89 files; it has every new file and migration v7, and no config, docs or tools). `etowah-hostinger.zip` (123 files).
+
+**Can only be tested on the live server (test mode):**
+- Creating a real Stripe Checkout Session and the redirect to checkout.stripe.com.
+- The Authorize.net getHostedPaymentPageRequest token and the auto-submit to test.authorize.net.
+- Real webhook delivery from both gateways, with the real signing secrets.
+- `getTransactionDetailsRequest` against the sandbox.
+- The "Test connection" buttons.
+- A real ACH payment through Stripe test bank accounts.
+- The return-page auto-refresh while the webhook arrives.
+- Real SMTP delivery of the HTML emails.
+- The Hostinger Cron Job.
+- LiteSpeed applying the /pay rewrites and the cron/ deny rule.
+- fastcgi/litespeed_finish_request.
+
+**Deploy status:** [Pending / Uploaded to Hostinger on YYYY-MM-DD]

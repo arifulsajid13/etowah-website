@@ -1018,3 +1018,157 @@ strong { color: var(--text); font-weight: 600; }
 .diagnostics code { word-break: break-all; }
 .diag-files { font-size: 0.875rem; }
 @media (max-width: 639.98px) { .diag-list { grid-template-columns: 1fr; } .diag-list dd { margin-bottom: 8px; } }
+
+/* Invoices
+   ========================================================================== */
+
+.field input[type="date"],
+.field input[type="tel"] {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.4;
+}
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled { opacity: .6; cursor: not-allowed; }
+
+.badge--draft,
+.badge--void,
+.badge--refunded,
+.badge--pay-failed { color: var(--muted); }
+.badge--sent,
+.badge--viewed,
+.badge--pay-pending { background: var(--info-bg); border-color: transparent; color: var(--link); }
+.badge--processing,
+.badge--partially_paid { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
+.badge--paid,
+.badge--pay-succeeded { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
+.badge--overdue { background: var(--danger-bg); border-color: transparent; color: var(--danger); }
+.badge--pay-refunded { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
+
+.table .num,
+.items-table .num { text-align: right; white-space: nowrap; }
+.table th.num { text-align: right; }
+
+.stat-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.items-table { width: 100%; margin-bottom: 12px; border-collapse: collapse; }
+.items-table th {
+  padding: 0 6px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.items-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.items-table th:first-child,
+.items-table td:first-child { width: 50%; padding-left: 0; }
+.items-table td[data-item-total] { padding-top: 18px; color: var(--text); font-weight: 600; }
+.field .items-table textarea { min-height: 64px; }
+.items-table input[data-item-qty] { max-width: 80px; text-align: right; }
+.items-table input[data-item-price] { max-width: 130px; text-align: right; }
+.item-actions { white-space: nowrap; }
+.item-actions .icon-btn + .icon-btn { margin-left: 2px; }
+
+.invoice-sums { width: min(320px, 100%); margin: 16px 0 0 auto; }
+.invoice-sums div { display: flex; justify-content: space-between; gap: 16px; padding: 5px 0; }
+.invoice-sums dt { color: var(--muted); }
+.invoice-sums dd { margin: 0; color: var(--text); font-weight: 600; }
+.invoice-sums .is-total { margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--border); }
+.invoice-sums .is-total dt,
+.invoice-sums .is-total dd { color: var(--text); font-family: var(--font-head); font-size: 1.125rem; font-weight: 800; }
+
+.invoice-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: var(--panel-2);
+  border-radius: var(--radius);
+}
+.invoice-summary > div { display: flex; flex-direction: column; min-width: 0; }
+.summary-value { color: var(--text); font-family: var(--font-head); font-size: 1.375rem; font-weight: 800; }
+.summary-value.is-overdue { color: var(--danger); }
+
+.action-list { display: grid; gap: 14px; }
+.action-list form { margin: 0; }
+.action-list .btn--block { justify-content: center; }
+.copy-row { display: flex; gap: 8px; }
+.copy-row input { flex: 1 1 auto; min-width: 0; }
+.panel .copy-row input {
+  padding: 8px 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.timeline { margin: 0; padding: 0; list-style: none; }
+.timeline li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 14px 20px;
+  border-left: 1px solid var(--border);
+}
+.timeline li::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: -5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--steel-300);
+}
+.timeline li:last-child { padding-bottom: 0; }
+.timeline-what { color: var(--text); }
+.timeline-when { color: var(--muted); font-size: 0.8125rem; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+.tab {
+  margin-bottom: -1px;
+  padding: 10px 16px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-current="page"] { border-bottom-color: var(--steel-300); color: var(--text); }
+.check--small { margin-top: 6px; font-size: 0.8125rem; }
+.code-list code { font-size: 0.8125rem; word-break: break-all; }
+.panel-head .badge { flex: none; }
+
+@media (max-width: 1100px) {
+  .stat-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 639.98px) {
+  .stat-grid--3 { grid-template-columns: 1fr; }
+  .invoice-summary { grid-template-columns: 1fr; }
+  .table td.num { text-align: left; }
+  .items-table thead { display: none; }
+  .items-table,
+  .items-table tbody,
+  .items-table tr,
+  .items-table td { display: block; width: 100%; }
+  .items-table tr { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .items-table td,
+  .items-table th:first-child,
+  .items-table td:first-child { width: 100%; padding: 4px 0; border: 0; }
+  .items-table td.num { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .items-table td.num::before { content: attr(data-label); color: var(--muted); font-size: 0.8125rem; }
+  .items-table td[data-item-total] { padding-top: 4px; }
+  .item-actions { text-align: right; }
+}

@@ -14,5 +14,7 @@ echo "Disallow: /admin/\n";
 echo "Disallow: /install/\n";
 echo "Disallow: /app/\n";
 echo "Disallow: /storage/\n";
+echo "Disallow: /pay\n";
+echo "Disallow: /webhooks/\n";
 echo "\n";
 echo 'Sitemap: ', site_url('/sitemap.xml'), "\n";

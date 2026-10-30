@@ -6,7 +6,7 @@ declare(strict_types=1);
  * The current version is stored in settings.schema_version; fresh installs get it from the seed.
  */
 
-const SCHEMA_VERSION = 6;
+const SCHEMA_VERSION = 7;
 
 /** Run any pending upgrades once. Called from bootstrap on every request (one cheap settings lookup). */
 function migrate_if_needed(): void
@@ -84,6 +84,13 @@ function run_migrations(PDO $pdo, int $from): void
                 $pdo->exec("ALTER TABLE project_images ADD COLUMN {$column} {$definition}");
             }
         }
+    }
+    if ($from < 7) {
+        // v7: invoices and online payments. schema.sql only uses CREATE TABLE IF NOT EXISTS, so running it again is safe.
+        require_once APP . '/seed.php';
+        run_schema($pdo);
+        // The invoice counter needs a real row so it can be locked while a number is taken.
+        $pdo->prepare("INSERT IGNORE INTO settings (k, v) VALUES ('invoice_next_number', ?)")->execute([SETTING_DEFAULTS['invoice_next_number']]);
     }
     $stmt = $pdo->prepare("INSERT INTO settings (k, v) VALUES ('schema_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)");
     $stmt->execute([(string) SCHEMA_VERSION]);

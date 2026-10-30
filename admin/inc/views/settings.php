@@ -109,6 +109,7 @@ $cls = fn(string $k) => isset($errors[$k]) ? ' has-error' : '';
 
 admin_start('Site Settings', 'settings');
 ?>
+        <?= settings_tabs('settings') ?>
 <?php if ($errors): ?>
         <p class="notice notice--error" role="alert">Please fix the highlighted fields below.</p>
 <?php endif; ?>

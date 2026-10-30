@@ -7,7 +7,7 @@ require_once ROOT . '/partials/icons.php';
 
 /**
  * Print everything up to (not including) <main>.
- * $opt: active (nav key), title, description, path (canonical), og_image, jsonld (extra objects), noindex.
+ * $opt: active (nav key), title, description, path (canonical), og_image, jsonld (extra objects), noindex, styles / scripts (extra CSS / JS files in /assets).
  */
 function layout_start(string $pageKey, array $opt = []): void
 {
@@ -20,6 +20,8 @@ function layout_start(string $pageKey, array $opt = []): void
     $ogImage = $opt['og_image'] ?? ($hero ? site_url(media_url($hero['path'])) : '');
     $active = $opt['active'] ?? $pageKey;
     $noindex = !empty($opt['noindex']);
+    $styles = $opt['styles'] ?? [];
+    $scripts = $opt['scripts'] ?? [];
 
     $jsonld = array_merge([organization_jsonld()], $opt['jsonld'] ?? []);
     $verification = setting('google_site_verification');
@@ -28,12 +30,12 @@ function layout_start(string $pageKey, array $opt = []): void
     require ROOT . '/partials/header.php';
 }
 
-/** $opt: footer ('cta' | 'compact'), cta_title, cta_button. */
+/** $opt: footer ('cta' | 'compact'), cta_title, cta_button, footer_style (false = no inline background style, for pages with a strict CSP). */
 function layout_end(array $opt = []): void
 {
     $ctaTitle = $opt['cta_title'] ?? 'Let’s discuss your next project.';
     $ctaButton = $opt['cta_button'] ?? 'Get in Touch';
-    $footerStyle = footer_background_style();
+    $footerStyle = ($opt['footer_style'] ?? true) ? footer_background_style() : '';
     if (($opt['footer'] ?? 'cta') === 'compact') {
         require ROOT . '/partials/footer-only.php';
     } else {

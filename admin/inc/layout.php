@@ -13,6 +13,9 @@ function admin_icon(string $name): string
         'careers'   => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.3-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.3 0 3.9 1.4 4.5 4"/>',
         'pages'     => '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><circle cx="11.5" cy="14" r="2.5"/><path d="M13.3 15.8L16 18.5"/>',
         'settings'  => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+        'invoices'  => '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/>',
+        'copy'      => '<rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 8V4H4v12h4"/>',
+        'print'     => '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="1"/><path d="M7 14h10v7H7z"/>',
         'users'     => '<circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/>',
         'logout'    => '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/>',
         'sun'       => '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -36,18 +39,20 @@ function admin_asset(string $file): string
     return '/admin/assets/' . $file . '?v=' . (is_file($path) ? filemtime($path) : '1');
 }
 
-/** $section: overview | inquiries | projects | jobs | applications | pages | settings | users */
+/** $section: overview | inquiries | projects | jobs | applications | invoices | pages | settings | users */
 function admin_start(string $title, string $section): void
 {
     $user = current_user();
     $flash = flash_take();
     $newInquiries = (int) db_value("SELECT COUNT(*) FROM inquiries WHERE status = 'new'");
     $newApplications = (int) db_value("SELECT COUNT(*) FROM applications WHERE status = 'new'");
+    $overdueInvoices = (int) db_value('SELECT COUNT(*) FROM invoices WHERE ' . INVOICE_OVERDUE_SQL);
     $nav = [
         ['overview', 'Overview', 'overview', admin_url('overview'), 0],
         ['inquiries', 'Inquiries', 'inquiries', admin_url('inquiries'), $newInquiries],
         ['projects', 'Projects', 'projects', admin_url('projects'), 0],
         ['jobs', 'Careers', 'careers', admin_url('jobs'), $newApplications],
+        ['invoices', 'Invoices', 'invoices', admin_url('invoices'), $overdueInvoices],
         ['pages', 'Pages & SEO', 'pages', admin_url('pages'), 0],
         ['settings', 'Site Settings', 'settings', admin_url('settings'), 0],
         ['users', 'Users', 'users', admin_url('users'), 0],
@@ -82,7 +87,7 @@ function admin_start(string $title, string $section): void
 <?php foreach ($nav as [$key, $label, $icon, $href, $count]):
     $active = $key === $section || ($key === 'jobs' && $careers); ?>
           <li>
-            <a class="side-link" href="<?= e($href) ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= admin_icon($icon) ?><span><?= e($label) ?></span><?php if ($count): ?><span class="side-count" title="<?= $count ?> new"><?= $count ?></span><?php endif; ?></a>
+            <a class="side-link" href="<?= e($href) ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= admin_icon($icon) ?><span><?= e($label) ?></span><?php if ($count): ?><span class="side-count" title="<?= $count ?> <?= $key === 'invoices' ? 'overdue' : 'new' ?>"><?= $count ?></span><?php endif; ?></a>
 <?php if ($key === 'jobs'): ?>
             <ul class="side-sub">
               <li><a href="<?= e(admin_url('jobs')) ?>"<?= $section === 'jobs' ? ' aria-current="page"' : '' ?>>Jobs</a></li>

@@ -21,6 +21,7 @@ $licenseNo = setting('license_number');
             <li><a href="/about">About</a></li>
             <li><a href="/careers">Careers</a></li>
             <li><a href="/contact">Contact</a></li>
+            <li><a href="/pay">Pay an Invoice</a></li>
           </ul>
         </nav>
         <nav class="footer-col" aria-labelledby="footer-services-heading">

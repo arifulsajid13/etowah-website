@@ -165,3 +165,7 @@ A package extracted into its own subfolder is also found. If several zips are in
 The import never overwrites text you edited in the dashboard, a real main photo or page photo you uploaded, or a homepage choice you changed. Running it twice adds nothing twice. A newer package (for example with touched-up photos) swaps the photos it imported before, in place.
 
 Need help? Tell your developer what you see on the screen. The dashboard's **Site Settings → System** box shows the server's health and the most recent errors.
+
+## 12. Online invoice payments (optional)
+
+Invoices are in the dashboard under **Invoices**. To let customers pay online with Stripe or Authorize.net, follow **docs/PAYMENTS.md** step by step (it covers creating the accounts, copying the keys, adding the webhooks, testing, and going live). Without a payment provider, invoices still work: customers see the invoice and are asked to call to pay.
